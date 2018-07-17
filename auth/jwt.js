@@ -9,6 +9,7 @@ const options = {
   algorithms: ['HS256']
 };
 
+
 const jwtStrategy = new JwtStrategy(options, (payload, done) => {
   done(null, payload.user);
 });

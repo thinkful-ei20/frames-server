@@ -30,11 +30,13 @@ router.post('/refresh', (req, res) => {
 });
 
 // Generate AuthToken for user
+
+
 const createAuthToken = (user) => {
-  return jwt.sign({ user }), JWT_SECRET, {
+  return jwt.sign({ user }, JWT_SECRET, {
     subject: user.username,
     expiresIn: JWT_EXPIRY
-  };
+  });
 };
 
 module.exports = router;
