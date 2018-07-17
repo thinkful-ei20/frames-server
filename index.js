@@ -1,25 +1,49 @@
 
+
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
+const passport = require('passport');
+
+// Strategies
+const localStrategy = require('./auth/local');
+const jwtStrategy = require('./auth/jwt');
 
 const { PORT, CLIENT_ORIGIN } = require('./config');
 const { dbConnect } = require('./db-mongoose');
 
+// ROUTERS
+const adminRouter = require('./users/routes/admin');
+const authRouter = require('./users/routes/auth');
+
+// Express app
 const app = express();
 
+// Morgan
 app.use(
 	morgan(process.env.NODE_ENV === 'production' ? 'common' : 'dev', {
 		skip: (req, res) => process.env.NODE_ENV === 'test'
 	})
 );
 
+// CORS
 app.use(
 	cors({
 		origin: CLIENT_ORIGIN
 	})
 );
+
+// Parse request body
+app.use(express.json());
+
+// Auth
+passport.use(localStrategy);
+passport.use(jwtStrategy);
+
+// Endpoints
+app.use('/api', authRouter);
+app.use('/api/admin', adminRouter);
 
 // Catch-all 404
 app.use(function (req, res, next) {
@@ -38,6 +62,7 @@ app.use(function (err, req, res, next) {
 	});
 });
 
+// RUN SERVER
 function runServer(port = PORT) {
 	const server = app
 		.listen(port, () => {
