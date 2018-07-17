@@ -2,12 +2,12 @@
 
 const express = require('express');
 
-const User = require('../models/user');
+const Admin = require('../models/admin');
 
 const router = express.Router();
 
 /* =================================================================================== */
-// CREATE NEW USER
+// CREATE NEW ADMIN
 router.post('/', (req, res, next) => {
   const requiredFields = ['username', 'email', 'companyname', 'password'];
   const missingField = requiredFields.find(field => !(field in req.body));
@@ -76,18 +76,18 @@ router.post('/', (req, res, next) => {
     return next(err);
   }
 
-  // Create the new user
+  // Create the new admin user
   let { username, email, companyname, password } = req.body;
   
-  return User.hashPassword(password)
+  return Admin.hashPassword(password)
     .then(digest => {
-      const newUser = {
+      const newAdmin = {
         username, 
         email,
         companyname,
         password: digest
       };
-      return User.create(newUser);
+      return Admin.create(newAdmin);
     })
     .then(result => {
       return res.status(201)
@@ -105,11 +105,11 @@ router.post('/', (req, res, next) => {
 });
 
 /* =================================================================================== */
-// GET ALL USERS
+// GET ALL ADMINS
 router.get('/', (req, res, next) => {
-  User.find()
-    .then(user => {
-      res.json(user);
+  Admin.find()
+    .then(admin => {
+      res.json(admin);
     })
     .catch(err => {
       console.error(err);
@@ -122,10 +122,10 @@ router.get('/', (req, res, next) => {
 router.delete('/:id', (req, res, next) => {
   const { id } = req.params;
 
-  User.findOneAndRemove({ _id: id })
+  Admin.findOneAndRemove({ _id: id })
     .then(() => {
       res.json({
-        message: 'Deleted user'
+        message: 'Deleted Admin user'
       });
       res.status(204).end();
     })

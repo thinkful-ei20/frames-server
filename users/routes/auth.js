@@ -5,7 +5,7 @@ const passport = require('passport');
 const jwt = require('jsonwebtoken');
 
 // SCHEMA
-const User = require('../models/user');
+const Admin = require('../models/Admin');
 
 const { JWT_SECRET, JWT_EXPIRY } = require('../../config');
 const router = express.Router();
@@ -22,7 +22,7 @@ router.post('/login', localAuth, (req, res) => {
 router.use('/refresh', passport.authenticate('jwt', { session: false, failWithError: true }));
 
 router.post('/refresh', (req, res) => {
-  User.find({ _id: req.user.id })
+  Admin.find({ _id: req.user.id })
     .then(user => {
       const authToken = createAuthToken(user[0]);
       res.json({ authToken });
