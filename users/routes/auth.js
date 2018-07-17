@@ -5,7 +5,7 @@ const passport = require('passport');
 const jwt = require('jsonwebtoken');
 
 // SCHEMA
-const Admin = require('../models/Admin');
+const Admin = require('../models/admin');
 
 const { JWT_SECRET, JWT_EXPIRY } = require('../../config');
 const router = express.Router();
