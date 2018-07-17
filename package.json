@@ -1,7 +1,7 @@
 {
-  "name": "thinkful-backend-template",
+  "name": "frames-app-server",
   "version": "1.0.0",
-  "description": "Template for an Express backend",
+  "description": "server using express, with mongoose as the DB driver",
   "main": "index.js",
   "scripts": {
     "start": "nodemon index.js",
@@ -17,10 +17,8 @@
   "dependencies": {
     "cors": "^2.8.4",
     "express": "^4.16.3",
-    "knex": "^0.14.4",
     "mongoose": "^5.0.6",
     "morgan": "^1.9.0",
-    "pg": "^7.4.1"
   },
   "devDependencies": {
     "chai": "^4.1.2",
