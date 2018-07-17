@@ -14,7 +14,7 @@ const { PORT, CLIENT_ORIGIN } = require('./config');
 const { dbConnect } = require('./db-mongoose');
 
 // ROUTERS
-const adminRouter = require('./users/routes/admin');
+const adminRouter = require('./users/routes/Admin');
 const authRouter = require('./users/routes/auth');
 
 // Express app
