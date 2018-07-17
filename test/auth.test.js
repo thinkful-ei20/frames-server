@@ -1,6 +1,9 @@
 'use strict';
 /** api/auth/login test */
 
+// it('', () => {
+// });
+
 require('dotenv').config();
 
 const { app } = require('../index');
@@ -38,3 +41,20 @@ describe('Sanity check', () => {
 });
 
 /* ================================================================================= */
+// ENVIORONMENT
+describe('ENVIRONMENT', () => {
+  it('NODE_ENV should be "test"', () => {
+    expect(process.env.NODE_ENV).to.equal('test');
+  });
+});
+
+/* ================================================================================= */
+describe('404 handler', () => {
+  it('Should respond with 404 when given a bad path', () => {
+    return chai.request(app)
+      .get('/bad/path')
+      .catch(res => {
+        expect(res).to.have.status(404);
+      });
+  });
+});
