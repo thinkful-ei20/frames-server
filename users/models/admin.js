@@ -6,8 +6,9 @@ const mongoose = require('mongoose');
 const adminSchema = new mongoose.Schema({
   username: { type: String },
   email: { type: String, require: true, unique: true },
-  companyname: { type: String, require: true },
-  password: { type: String, require: true }
+  companyName: { type: String, require: true },
+  password: { type: String, require: true },
+  phoneNumber: {type: Number, required:true}
 }, { timestamps: true });
 
 adminSchema.set('toObject', {
