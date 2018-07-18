@@ -124,9 +124,9 @@ router.get('/', (req, res, next) => {
 // DELETE A USER BY ID
 // Needs to delete all things associated with it (employees, frames)
 router.delete('/:adminId', (req, res, next) => {
-  const { id } = req.params;
+  const { adminId } = req.params;
 
-  Admin.findOneAndRemove({ _id: id })
+  Admin.findOneAndRemove({ _id: adminId })
     .then(() => {
       res.json({
         message: 'Deleted Admin user'
