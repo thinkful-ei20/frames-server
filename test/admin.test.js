@@ -65,13 +65,12 @@ describe('/api/admin', () => {
         .then(admin => {
           expect(admin).to.exist;
           expect(admin.id).to.equal(res.body.id);
-          return Admin.validatePassword(password);
+          return Admin.validatePassword(newAdmin.password);
         })
         .then(isValid => {
           expect(isValid).to.be.true;
         });
     });
   });
-
 // END
 });
