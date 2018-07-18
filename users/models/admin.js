@@ -8,7 +8,7 @@ const adminSchema = new mongoose.Schema({
   email: { type: String, require: true, unique: true },
   companyName: { type: String, require: true },
   password: { type: String, require: true },
-  phoneNumber: { type: Number, required:true }
+  phoneNumber: { type: Number, required: true }
 }, { timestamps: true });
 
 adminSchema.set('toObject', {
