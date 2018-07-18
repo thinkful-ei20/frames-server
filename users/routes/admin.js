@@ -140,7 +140,6 @@ router.delete('/:adminId', (req, res, next) => {
 });
 
 
-
 /* =================================================================================== */
 // PROTECTED
 router.use('/:adminId', passport.authenticate('jwt', { session: false, failWithError: true }));
