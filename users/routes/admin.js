@@ -9,7 +9,7 @@ const router = express.Router();
 /* =================================================================================== */
 // CREATE NEW ADMIN
 router.post('/', (req, res, next) => {
-  const requiredFields = ['username', 'email', 'companyname', 'password', 'phoneNumber'];
+  const requiredFields = ['username', 'email', 'companyName', 'password', 'phoneNumber'];
   const missingField = requiredFields.find(field => !(field in req.body));
   
   if (missingField) {
@@ -19,7 +19,7 @@ router.post('/', (req, res, next) => {
     return next(err);
   }
 
-  const stringFields = ['username', 'email', 'companyname', 'password'];
+  const stringFields = ['username', 'email', 'companyName', 'password'];
   const nonStringField = stringFields.find(field => {
     field in req.body && typeof req.body[field] !== 'string';
   });
@@ -31,30 +31,26 @@ router.post('/', (req, res, next) => {
     return next(err);
   }
 
-  const trimmedFields = ['username', 'email', 'companyname', 'password', phoneNumber];
+  console.log('made it to trimming');
+  const trimmedFields = ['username', 'email', 'companyName', 'password'];
   const nonTrimmedField = trimmedFields.find(field => {
-    let to = typeof field;
-    console.log(to);
-    if (typeof field === 'number') {
-      req.body[field];
-    } else {
       req.body[field].trim() !== req.body[field];
-    }
   });
 
   if (nonTrimmedField) {
     const err = new Error(`Field: '${nonTrimmedField}' cannot start or end with a whitespace!`);
     err.status = 422;
+    console.log('somehow in the if statement');
     console.error(err);
     return next(err);
   }
 
+  console.log('not in the if statement');
   const sizedFields = {
     username: { min: 1 },
     email: { min: 1 },
     companyName: { min: 1 },
-    password: { min: 8, max: 72 },
-    phoneNumber: { min: 9 }
+    password: { min: 8, max: 72 }
   };
 
   const tooSmall = Object.keys(sizedFields).find(field => {
@@ -84,14 +80,14 @@ router.post('/', (req, res, next) => {
   }
 
   // Create the new admin user
-  let { username, email, companyname, password, phoneNumber } = req.body;
+  let { username, email, companyName, password, phoneNumber } = req.body;
 
   return Admin.hashPassword(password)
     .then(digest => {
       const newAdmin = {
         username, 
         email,
-        companyname,
+        companyName,
         phoneNumber,
         password: digest
       };
@@ -103,6 +99,7 @@ router.post('/', (req, res, next) => {
         .json(result);
     })
     .catch(err => {
+      console.log(err);
       if (err.code === 11000) {
         err = new Error('The email already exists');
         err.status = 400;

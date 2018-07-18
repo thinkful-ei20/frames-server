@@ -21,7 +21,7 @@ describe('/api/admin', () => {
   const _id = '333333333333333333333333';
   const username = 'exampleuser';
   const email = 'example@test.com';
-  const companyname = 'merntalists';
+  const companyName = 'merntalists';
   const password = 'password123';
   const phoneNumber = 2225551111;
 
@@ -45,16 +45,16 @@ describe('/api/admin', () => {
       return chai
         .request(app)
         .post('/api/admin')
-        .send({ username, email, companyname, password, phoneNumber })
+        .send({ username, email, companyName, password, phoneNumber })
         .then(_res => {
           res = _res;
           expect(res).to.have.status(201);
           expect(res.body).to.be.an('object');
-          expect(res.body).to.have.keys('id', 'username', 'email', 'companyname', 'phoneNumber', 'createdAt', 'updatedAt');
+          expect(res.body).to.have.keys('id', 'username', 'email', 'companyName', 'phoneNumber', 'createdAt', 'updatedAt');
           expect(res.body.id).to.exist;
           expect(res.body.username).to.equal(username);
           expect(res.body.email).to.equal(email);
-          expect(res.body.companyname).to.equal(companyname);
+          expect(res.body.companyName).to.equal(companyName);
           expect(res.body.phoneNumber).to.equal(phoneNumber);
           return Admin.findOne({ username });
         })
