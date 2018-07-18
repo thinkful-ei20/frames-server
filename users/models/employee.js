@@ -3,16 +3,17 @@
 const bcrypt = require('bcryptjs');
 const mongoose = require('mongoose');
 
-const adminSchema = new mongoose.Schema({
-  username: { type: String },
+const employeeSchema = new mongoose.Schema({
+  firstname: { type: String },
+  lastname: { type: String },
   email: { type: String, require: true, unique: true },
-  companyName: { type: String, require: true },
+  companyname: { type: String, require: true },
   password: { type: String, require: true },
   phoneNumber: { type: Number, require: true }
-}, { timestamps: true });
+});
 
-adminSchema.set('toObject', {
-  transform: (doc, ret) => {
+employeeSchema.set('toObject', {
+  transform: (document, ret) => {
     ret.id = ret._id;
     delete ret._id;
     delete ret.__v;
@@ -20,12 +21,12 @@ adminSchema.set('toObject', {
   }
 });
 
-adminSchema.methods.validatePassword = function(password) {
+employeeSchema.methods.validatePassword = function(password) {
   return bcrypt.compare(password, this.password);
 };
 
-adminSchema.statics.hashPassword = function (password) {
+employeeSchema.statics.hashPassword = function (password) {
   return bcrypt.hash(password, 10);
 };
 
-module.exports = mongoose.model('Admin', adminSchema);
+module.exports = mongoose.model('Employee', employeeSchema);
