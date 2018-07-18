@@ -21,11 +21,15 @@ router.post('/login', localAuth, (req, res) => {
 // Refresh AuthToken
 router.use('/refresh', passport.authenticate('jwt', { session: false, failWithError: true }));
 
-router.post('/refresh', (req, res) => {
+router.post('/refresh', (req, res, next) => {
   Admin.find({ _id: req.user.id })
     .then(user => {
       const authToken = createAuthToken(user[0]);
       res.json({ authToken });
+    })
+    .catch(err => {
+      console.error(err);
+      next(err);
     });
 });
 

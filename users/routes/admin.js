@@ -19,7 +19,7 @@ router.post('/', (req, res, next) => {
     return next(err);
   }
 
-  const stringFields = ['username', 'email', 'companyName','password'];
+  const stringFields = ['username', 'email', 'companyname', 'password'];
   const nonStringField = stringFields.find(field => {
     field in req.body && typeof req.body[field] !== 'string';
   });
