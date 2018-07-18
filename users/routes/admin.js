@@ -8,6 +8,7 @@ const router = express.Router();
 
 /* =================================================================================== */
 // CREATE NEW ADMIN
+//MARINA MADE CHANGES DANGIT!
 router.post('/', (req, res, next) => {
   const requiredFields = ['username', 'email', 'companyName', 'password', 'phoneNumber'];
   const missingField = requiredFields.find(field => !(field in req.body));
