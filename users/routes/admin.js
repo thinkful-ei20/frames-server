@@ -170,9 +170,12 @@ router.get('/:adminId', (req, res, next) => {
 });
 
 router.put('/:adminId', (req, res, next) => {
+  
   const { adminId } = req.params;
-  const { username, email, companyName, phoneNumber } = req.body;
-  const updatedAdmin = { adminId, username, email, companyName, phoneNumber };
+  const updatedAdmin = {};
+  Object.keys(req.body).forEach(key => {
+    updatedAdmin[key] = req.body[key];
+  });
 
   if (!mongoose.Types.ObjectId.isValid(adminId)) {
     const err = new Error('The `id` is not valid');
