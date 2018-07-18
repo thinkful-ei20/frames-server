@@ -1,14 +1,16 @@
 'use strict';
 /** api/auth/login test */
 
+// it('', () => {
+// });
+
 require('dotenv').config();
 
 const { app } = require('../index');
 const chai = require('chai');
 const chaiHttp = require('chai-http');
-const jwt = require('jsonwebtoken');
 
-const { TEST_DATABASE_URL, JWT_SECRET } = require('../config');
+const { TEST_DATABASE_URL } = require('../config');
 const {dbConnect, dbDisconnect} = require('../db-mongoose');
 
 const expect = chai.expect;
@@ -38,3 +40,20 @@ describe('Sanity check', () => {
 });
 
 /* ================================================================================= */
+// ENVIORONMENT
+describe('ENVIRONMENT', () => {
+  it('NODE_ENV should be "test"', () => {
+    expect(process.env.NODE_ENV).to.equal('test');
+  });
+});
+
+/* ================================================================================= */
+describe('404 handler', () => {
+  it('Should respond with 404 when given a bad path', () => {
+    return chai.request(app)
+      .get('/bad/path')
+      .catch(res => {
+        expect(res).to.have.status(404);
+      });
+  });
+});

@@ -9,7 +9,7 @@ const router = express.Router();
 /* =================================================================================== */
 // CREATE NEW ADMIN
 router.post('/', (req, res, next) => {
-  const requiredFields = ['username', 'email', 'companyName', 'password', 'phoneNumber'];
+  const requiredFields = ['username', 'email', 'companyname', 'password', 'phoneNumber'];
   const missingField = requiredFields.find(field => !(field in req.body));
   
   if (missingField) {
@@ -19,7 +19,7 @@ router.post('/', (req, res, next) => {
     return next(err);
   }
 
-  const stringFields = ['username', 'email', 'companyName','password'];
+  const stringFields = ['username', 'email', 'companyname', 'password'];
   const nonStringField = stringFields.find(field => {
     field in req.body && typeof req.body[field] !== 'string';
   });
@@ -31,7 +31,7 @@ router.post('/', (req, res, next) => {
     return next(err);
   }
 
-  const trimmedFields = ['username', 'email', 'companyName', 'password', 'phoneNumber'];
+  const trimmedFields = ['username', 'email', 'companyname', 'password', 'phoneNumber'];
   const nonTrimmedField = trimmedFields.find(field => {
     req.body[field].trim() !== req.body[field];
   });
@@ -77,14 +77,14 @@ router.post('/', (req, res, next) => {
   }
 
   // Create the new admin user
-  let { username, email, companyName, password, phoneNumber } = req.body;
+  let { username, email, companyname, password, phoneNumber } = req.body;
   
   return Admin.hashPassword(password)
     .then(digest => {
       const newAdmin = {
         username, 
         email,
-        companyName,
+        companyname,
         phoneNumber,
         password: digest
       };
