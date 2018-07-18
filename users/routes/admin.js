@@ -169,5 +169,29 @@ router.get('/:adminId', (req, res, next) => {
     });
 });
 
+router.put('/:adminId', (req, res, next) => {
+  const { adminId } = req.params;
+  const { username, email, companyName, phoneNumber } = req.body;
+  const updatedAdmin = { adminId, username, email, companyName, phoneNumber };
+
+  if (!mongoose.Types.ObjectId.isValid(adminId)) {
+    const err = new Error('The `id` is not valid');
+    err.status = 400;
+    return next(err);
+  }
+
+  return Admin.findByIdAndUpdate(adminId, updatedAdmin, { new:true })
+    .then(admin => {
+      if (admin) {
+        res.json(admin);
+      } else {
+        next();
+      }
+    })
+    .catch(err => {
+      next(err);
+    });
+});
+
 module.exports = router;
 
