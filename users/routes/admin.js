@@ -1,7 +1,8 @@
 'use strict';
 
 const express = require('express');
-
+const mongoose = require('mongoose');
+const passport = require('passport');
 const Admin = require('../models/admin');
 
 const router = express.Router();
@@ -121,7 +122,8 @@ router.get('/', (req, res, next) => {
 
 /* =================================================================================== */
 // DELETE A USER BY ID
-router.delete('/:id', (req, res, next) => {
+// Needs to delete all things associated with it (employees, frames)
+router.delete('/:adminId', (req, res, next) => {
   const { id } = req.params;
 
   Admin.findOneAndRemove({ _id: id })
@@ -137,4 +139,36 @@ router.delete('/:id', (req, res, next) => {
     });
 });
 
+
+
+/* =================================================================================== */
+// PROTECTED
+router.use('/:adminId', passport.authenticate('jwt', { session: false, failWithError: true }));
+
+// GET ADMIN BY ID
+router.get('/:adminId', (req, res, next) => {
+  const { adminId } = req.params;
+
+  // Valid input check
+  if(!mongoose.Types.ObjectId.isValid(adminId)) {
+    const err = new Error('The `id` is not valid');
+    err.status = 400;
+    return next(err);
+  }
+
+  Admin.findById({ _id: adminId })
+    .then(admin => {
+      if (admin) {
+        res.json(admin);
+      } else {
+        next();
+      }
+    })
+    .catch(err => {
+      console.error(err);
+      next(err);
+    });
+});
+
 module.exports = router;
+
