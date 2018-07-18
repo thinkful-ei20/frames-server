@@ -8,7 +8,6 @@ const router = express.Router();
 
 /* =================================================================================== */
 // CREATE NEW ADMIN
-//MARINA MADE CHANGES DANGIT!
 router.post('/', (req, res, next) => {
   const requiredFields = ['username', 'email', 'companyName', 'password', 'phoneNumber'];
   const missingField = requiredFields.find(field => !(field in req.body));
@@ -32,21 +31,18 @@ router.post('/', (req, res, next) => {
     return next(err);
   }
 
-  console.log('made it to trimming');
   const trimmedFields = ['username', 'email', 'companyName', 'password'];
   const nonTrimmedField = trimmedFields.find(field => {
-      req.body[field].trim() !== req.body[field];
+    req.body[field].trim() !== req.body[field];
   });
 
   if (nonTrimmedField) {
     const err = new Error(`Field: '${nonTrimmedField}' cannot start or end with a whitespace!`);
     err.status = 422;
-    console.log('somehow in the if statement');
     console.error(err);
     return next(err);
   }
 
-  console.log('not in the if statement');
   const sizedFields = {
     username: { min: 1 },
     email: { min: 1 },

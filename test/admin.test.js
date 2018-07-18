@@ -58,14 +58,14 @@ describe('/api/admin', () => {
           expect(res.body.phoneNumber).to.equal(phoneNumber);
           return Admin.findOne({ username });
         })
-        // .then(admin => {
-        //   expect(admin).to.exist;
-        //   expect(admin.id).to.equal(res.body.id);
-        //   return Admin.validatePassword(password);
-        // })
-        // .then(isValid => {
-        //   expect(isValid).to.be.true;
-        // });
+        .then(Admin => {
+          expect(Admin).to.exist;
+          expect(Admin.id).to.equal(res.body.id);
+          return Admin.validatePassword(password);
+        })
+        .then(isValid => {
+          expect(isValid).to.be.true;
+        });
     });
   });
 // END
