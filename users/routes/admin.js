@@ -31,9 +31,15 @@ router.post('/', (req, res, next) => {
     return next(err);
   }
 
-  const trimmedFields = ['username', 'email', 'companyname', 'password', 'phoneNumber'];
+  const trimmedFields = ['username', 'email', 'companyname', 'password', phoneNumber];
   const nonTrimmedField = trimmedFields.find(field => {
-    req.body[field].trim() !== req.body[field];
+    let to = typeof field;
+    console.log(to);
+    if (typeof field === 'number') {
+      req.body[field];
+    } else {
+      req.body[field].trim() !== req.body[field];
+    }
   });
 
   if (nonTrimmedField) {
@@ -47,7 +53,8 @@ router.post('/', (req, res, next) => {
     username: { min: 1 },
     email: { min: 1 },
     companyName: { min: 1 },
-    password: { min: 8, max: 72 }
+    password: { min: 8, max: 72 },
+    phoneNumber: { min: 9 }
   };
 
   const tooSmall = Object.keys(sizedFields).find(field => {
@@ -78,7 +85,7 @@ router.post('/', (req, res, next) => {
 
   // Create the new admin user
   let { username, email, companyname, password, phoneNumber } = req.body;
-  
+
   return Admin.hashPassword(password)
     .then(digest => {
       const newAdmin = {
@@ -92,7 +99,7 @@ router.post('/', (req, res, next) => {
     })
     .then(result => {
       return res.status(201)
-        .location(`/api/users/${result.id}`)
+        .location(`/api/admin/${result.id}`)
         .json(result);
     })
     .catch(err => {
