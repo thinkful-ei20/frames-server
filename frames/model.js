@@ -1,16 +1,14 @@
 const mongoose = require('mongoose');
 
-// Define UserSchema & UserModel
+// Define Frames Schema & Frames Model
 const frameSchema = new mongoose.Schema({
-  img: { type: String, required: true },
-  name: { type: String, required: true },
-  location: { type: String, default: '' }
-  adminId: { type: mongoose.Schema.Types.ObjectId, ref: 'Admin', required: true }
-});
+  adminId: { type: mongoose.Schema.Types.ObjectId, ref: 'Admin', required: true },
+  employeeId: { type: mongoose.Schema.Types.ObjectId, ref: 'Employee', required: true },
+  startFrame: { type: Date, require: true },
+  endFrame: { type: Date, require: true }
+}, { timestamps: true });
 
-// cardSchema.index({ prompt: 1, answer: 1 }, { unique: true });
-
-cardSchema.set('toObject', {
+frameSchema.set('toObject', {
   transform: function (doc, ret) {
     ret.id = ret._id;
     delete ret._id;
@@ -18,4 +16,4 @@ cardSchema.set('toObject', {
   }
 });
 
-module.exports = mongoose.model('Frame', cardSchema);
+module.exports = mongoose.model('Frame', frameSchema);
