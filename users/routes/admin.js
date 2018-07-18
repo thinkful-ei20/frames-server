@@ -97,7 +97,7 @@ router.post('/', (req, res, next) => {
     })
     .catch(err => {
       if (err.code === 11000) {
-        err = new Error('The username or email already exists');
+        err = new Error('The email already exists');
         err.status = 400;
       }
       console.error(err);
