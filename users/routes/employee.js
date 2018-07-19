@@ -9,16 +9,16 @@ router.use('/', passport.authenticate('jwt', { session: false, failWithError: tr
 
 // Get all employees
 router.get('/', (req, res, next) => {
-  const adminId = req.user;
+  const adminId = req.user.id;
 
-  Employee.findById(adminId)
+  Employee.find({adminId})
     .sort('lastname')
     .then(result => {
-      // if(result.length) {
+      if(result.length) {
         res.json(result);
-      // } else {
-      //   next();
-      // }
+      } else {
+        next();
+      }
     })
     .catch(next);
 });
