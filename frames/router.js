@@ -4,6 +4,7 @@ const router = require('express').Router();
 const passport = require('passport');
 const mongoose = require('mongoose');
 const Frame = require('./model');
+const Employee = require('../users/models/employee');
 
 // /aoi/frames/?startDate=date&endDate=date&emloyeeId=id&frameId=id
 
@@ -21,12 +22,29 @@ router.get('/', (req, res, next) => {
   const { startDate, endDate } = req.query;
   console.log('QUERY', req.query);
 
+
+
+  // Frame.findOne({ _id: frameId, adminId })
+  // // .populate('adminId')
+  //   .populate('employeeId', 'lastname')
+  //   .then(result => {
+  //     console.log('RESULT', result.employeeId.lastname);
+  //
+  //
+  //
+  //   })
+
+  const start = "2018-10-01";
+  const end = "2018-11-01";
+
   Frame.find({
     adminId,
-    "startFrame": { $gte: startDate },
-    "endFrame": { $lte: endDate }
+    "startFrame": { $gte: new Date(start) },
+    "endFrame": { $lte: new Date(end) }
   })
+    .populate('employeeId')
     .then(results => {
+      console.log('GET RESULTS', results);
       if(results.length) {
         res.json(results);
       } else {
@@ -166,16 +184,27 @@ router.put('/frame/:id', (req, res, next) => {
     endFrame: endDate };
 
   Frame.findOne({ _id: frameId, adminId })
+    // .populate('adminId')
+    .populate('employeeId', 'lastname')
     .then(result => {
-      if(!result) {
-        return next();
-      }
-      return Frame.findByIdAndUpdate(frameId, fields, { new: true })
+      console.log('RESULT', result.employeeId.lastname);
+
+
+
     })
-    .then(frame => {
-      return res.json(frame);
-    })
-    .catch(next);
+
+
+  // Frame.findOne({ _id: frameId, adminId })
+  //   .then(result => {
+  //     if(!result) {
+  //       return next();
+  //     }
+  //     return Frame.findByIdAndUpdate(frameId, fields, { new: true })
+  //   })
+  //   .then(frame => {
+  //     return res.json(frame);
+  //   })
+  //   .catch(next);
 });
 
 // Delete a single frame

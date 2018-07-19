@@ -6,8 +6,9 @@ const mongoose = require('mongoose');
 const employeeSchema = new mongoose.Schema({
   firstname: { type: String },
   lastname: { type: String },
+  img: { type: String },
   email: { type: String, require: true, unique: true },
-  companyname: { type: String, require: true },
+  adminId: { type: mongoose.Schema.Types.ObjectId, ref: 'Admin', required: true },
   password: { type: String, require: true },
   phoneNumber: { type: Number, require: true }
 });
