@@ -1,0 +1,46 @@
+{
+    /** 
+    * ESLint: http://eslint.org/docs/user-guide/configuring
+    */
+    
+    // "env:" supplies predefined global variables
+    "env": {
+        "browser": true,
+        "es6": true,
+        "node": true,
+        "mocha": true,
+        "mongo": true,
+        "jquery": true
+    },
+    // our configuration extends the recommended base configuration
+    "extends": [
+        "eslint:recommended",
+        "plugin:react/recommended" //ESlint react plugin
+    ],
+    // define the type of file `script` or `module` for ES6 Modules
+    "parserOptions": {
+        "ecmaVersion": 6,
+        "sourceType": "module",
+        "ecmaFeatures" : {
+            "jsx": true,
+            "experimentalObjectRestSpread": true
+        }
+	},
+    //ESLint rules: Severity Levels: off = 0 | warn = 1 | error = 2
+    "rules": {
+        "strict": "error",   			//prefer `'use-strict';` pragma
+        "eqeqeq":"error",              	//prefer strict equality `===`
+        "no-console": "off",          	//allows but warn about console like `console.log()`
+        "no-unused-vars": "warn",      	//warns about unused variables
+        "no-eval": "error",            	//disallows `eval()` usage
+        "indent": ["error", "tab"],    	//enforce tabs indents        
+        "quotes": ["error", "single"], 	//prefer single quotes over double quotes
+        "semi": ["error", "always"] ,   //enforce semi-colon usage
+        "no-trailing-spaces":"warn",
+        "arrow-spacing": "warn",
+        "no-else-return": "warn",
+		"no-floating-decimal": "warn",
+		"no-mixed-spaces-and-tabs":"error",
+		"no-fallthrough":"off"
+    }
+}
