@@ -22,25 +22,10 @@ router.get('/', (req, res, next) => {
   const { startDate, endDate } = req.query;
   console.log('QUERY', req.query);
 
-
-
-  // Frame.findOne({ _id: frameId, adminId })
-  // // .populate('adminId')
-  //   .populate('employeeId', 'lastname')
-  //   .then(result => {
-  //     console.log('RESULT', result.employeeId.lastname);
-  //
-  //
-  //
-  //   })
-
-  const start = "2018-10-01";
-  const end = "2018-11-01";
-
   Frame.find({
     adminId,
-    "startFrame": { $gte: new Date(start) },
-    "endFrame": { $lte: new Date(end) }
+    "startFrame": { $gte: startDate },
+    "endFrame": { $lte: endDate }
   })
     .populate('employeeId')
     .then(results => {
