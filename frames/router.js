@@ -13,20 +13,22 @@ router.use('/', passport.authenticate('jwt', { session: false, failWithError: tr
 
 // Get all frames
 router.get('/', (req, res, next) => {
+  
   const frameId = req.query.frameId;
-  console.log('FRAME ID', frameId);
-
   const adminId = req.user.id;
-  console.log('ADMIN ID', adminId);
-
   const { startDate, endDate } = req.query;
-  console.log('QUERY', req.query);
 
-  Frame.find({
-    adminId,
-    "startFrame": { $gte: startDate },
-    "endFrame": { $lte: endDate }
-  })
+  const filter = { adminId };
+
+  // Only filter on startDate and endDate if they are provided
+  if(startDate) {
+    filter.startFrame = { $gte: startDate };
+
+  } else if(endDate) {
+    filter.endFrame = { $lte: endDate };
+  }
+
+  Frame.find(filter)
     .populate('employeeId')
     .then(results => {
       console.log('GET RESULTS', results);
