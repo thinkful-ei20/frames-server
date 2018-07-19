@@ -16,6 +16,7 @@ const { dbConnect } = require('./db-mongoose');
 // ROUTERS
 const adminRouter = require('./users/routes/admin');
 const authRouter = require('./users/routes/auth');
+const employeeRouter = require('./users/routes/employee');
 const frameRouter = require('./frames/router');
 
 // Express app
@@ -45,6 +46,7 @@ passport.use(jwtStrategy);
 // Endpoints
 app.use('/api', authRouter);
 app.use('/api/admin', adminRouter);
+app.use('/api/employee', employeeRouter);
 app.use('/api/frames', frameRouter);
 
 // Catch-all 404
