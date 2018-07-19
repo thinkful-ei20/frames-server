@@ -4,6 +4,7 @@ const router = require('express').Router();
 const passport = require('passport');
 const mongoose = require('mongoose');
 const Frame = require('./model');
+const Employee = require('../users/models/employee');
 
 // /aoi/frames/?startDate=date&endDate=date&emloyeeId=id&frameId=id
 
@@ -12,21 +13,25 @@ router.use('/', passport.authenticate('jwt', { session: false, failWithError: tr
 
 // Get all frames
 router.get('/', (req, res, next) => {
+  
   const frameId = req.query.frameId;
-  console.log('FRAME ID', frameId);
-
   const adminId = req.user.id;
-  console.log('ADMIN ID', adminId);
-
   const { startDate, endDate } = req.query;
-  console.log('QUERY', req.query);
 
-  Frame.find({
-    adminId,
-    "startFrame": { $gte: startDate },
-    "endFrame": { $lte: endDate }
-  })
+  const filter = { adminId };
+
+  // Only filter on startDate and endDate if they are provided
+  if(startDate) {
+    filter.startFrame = { $gte: startDate };
+
+  } else if(endDate) {
+    filter.endFrame = { $lte: endDate };
+  }
+
+  Frame.find(filter)
+    .populate('employeeId')
     .then(results => {
+      console.log('GET RESULTS', results);
       if(results.length) {
         res.json(results);
       } else {
@@ -166,16 +171,27 @@ router.put('/frame/:id', (req, res, next) => {
     endFrame: endDate };
 
   Frame.findOne({ _id: frameId, adminId })
+    // .populate('adminId')
+    .populate('employeeId', 'lastname')
     .then(result => {
-      if(!result) {
-        return next();
-      }
-      return Frame.findByIdAndUpdate(frameId, fields, { new: true })
+      console.log('RESULT', result.employeeId.lastname);
+
+
+
     })
-    .then(frame => {
-      return res.json(frame);
-    })
-    .catch(next);
+
+
+  // Frame.findOne({ _id: frameId, adminId })
+  //   .then(result => {
+  //     if(!result) {
+  //       return next();
+  //     }
+  //     return Frame.findByIdAndUpdate(frameId, fields, { new: true })
+  //   })
+  //   .then(frame => {
+  //     return res.json(frame);
+  //   })
+  //   .catch(next);
 });
 
 // Delete a single frame
