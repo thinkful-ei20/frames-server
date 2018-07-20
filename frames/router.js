@@ -6,7 +6,18 @@ const mongoose = require('mongoose');
 const Frame = require('./model');
 const Employee = require('../users/models/employee');
 
-// /aoi/frames/?startDate=date&endDate=date&emloyeeId=id&frameId=id
+// Unprotected end point for testing purposes
+router.get('/test', (req, res, next) => {
+  Frame.find()
+    .then(result => {
+      if(result.length) {
+        res.json(result);
+      } else {
+        next();
+      }
+    })
+    .catch(next);
+});
 
 // Protect endpoints using JWT Strategy
 router.use('/', passport.authenticate('jwt', { session: false, failWithError: true }));
