@@ -41,6 +41,7 @@ router.get('/', (req, res, next) => {
 
 	Frame.find(filter)
 		.populate('employeeId')
+    .sort({'startFrame': 1})
 		.then(results => {
 			console.log('GET RESULTS', results);
 			if(results.length) {
