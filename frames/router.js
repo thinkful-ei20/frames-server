@@ -34,8 +34,9 @@ router.get('/', (req, res, next) => {
 	// Only filter on startDate and endDate if they are provided
 	if(startDate) {
 		filter.startFrame = { $gte: startDate };
+	}
 
-	} else if(endDate) {
+	if(endDate) {
 		filter.endFrame = { $lte: endDate };
 	}
 
@@ -43,7 +44,6 @@ router.get('/', (req, res, next) => {
 		.populate('employeeId')
     .sort({'startFrame': 1})
 		.then(results => {
-			console.log('GET RESULTS', results);
 			if(results.length) {
 				res.json(results);
 			} else {
@@ -157,6 +157,7 @@ router.post('/frame', (req, res, next) => {
 
 // Update a single frame
 router.put('/frame/:id', (req, res, next) => {
+  console.log('START DATE', req.body.startFrame);
 	const adminId = req.user.id;
 	const frameId = req.params.id;
 	const updateableFields = ['startFrame', 'endFrame', 'employeeId'];
