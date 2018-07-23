@@ -1,4 +1,4 @@
-'use strict';
+
 
 const router = require('express').Router();
 const passport = require('passport');
@@ -30,13 +30,68 @@ router.get('/:employeeId', (req,res,next) => {
 
 	Employee.find({_id : employeeId, adminId})
 		.then(result => {
-			if(result){
+			if(result.length){
 				return res.json(result);
 			}
 			next();
 		})
 		.catch(error => next(error));
 });
+
+// Update an existing employee
+router.put('/:employeeId', (req, res, next) => {
+	const updatedEmployee = {
+		adminId : req.user.id
+	};
+
+	// Only add fields that can be updated to updatedEmployee object
+	const employeeFields = ['firstname', 'lastname', 'img', 'email', 'phoneNumber', 'password'];
+	employeeFields.map(field => {
+		if (field in req.body){
+			updatedEmployee[field] = req.body[field];
+		}
+	});
+
+	// Check that all string fields are strings
+	const stringFields = ['firstname', 'lastname', 'img', 'email', 'password'];
+	stringFields.map(field => {
+		if (updatedEmployee[field] && (typeof updatedEmployee[field] !== 'string')){
+			const err = new Error(`${field} in request body must be a string`);
+			err.status = 422;
+			return next(err);
+		}
+	});
+
+	// Check that fields are trimmed as needed
+	const trimmedFields = ['password', 'email'];
+	trimmedFields.map(field => {
+		if(updatedEmployee[field] && updatedEmployee[field].trim() !== updatedEmployee[field]){
+			const err = new Error(`${field} must not have any leading or traliing spaces`);
+			err.status = 422;
+			return next(err);
+		}
+	});
+
+	// Check that password is long enough
+	if (updatedEmployee.password && updatedEmployee.password < 8){
+		const err = new Error('Passowrd must be at least 8 characters long');
+		err.status = 422;
+		return next(err);
+	}
+
+	Employee.findOneAndUpdate(
+		{_id : req.params.employeeId, adminId : req.user.id},
+		updatedEmployee,
+		{new : true})
+		.then(result => {
+			if (result){
+				return res.json(result);
+			}
+			return next();
+		})
+		.catch(error => next(error));
+});
+
 
 // Create a new employee
 router.post('/', (req,res,next) => {
@@ -122,5 +177,15 @@ router.post('/', (req,res,next) => {
 		.catch(error => next(error));
 
 });
+
+// Delete an employee
+router.delete('/:employeeId', (req,res,next) => {
+	Employee.findOneAndRemove({_id : req.params.employeeId, adminId : req.user.id})
+		.then(() => {
+			return res.sendStatus(204);
+		})
+		.catch(error => next(error));
+});
+
 
 module.exports = router;
