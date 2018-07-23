@@ -1,4 +1,4 @@
-'use strict';
+
 
 const express = require('express');
 const passport = require('passport');
@@ -14,33 +14,33 @@ const localAuth = passport.authenticate('local', { session: false, failWithError
 
 // Login endpoint for login
 router.post('/login', localAuth, (req, res) => {
-  const authToken = createAuthToken(req.user);
-  return res.json({ authToken });
+	const authToken = createAuthToken(req.user);
+	return res.json({ authToken });
 });
 
 // Refresh AuthToken
 router.use('/refresh', passport.authenticate('jwt', { session: false, failWithError: true }));
 
 router.post('/refresh', (req, res, next) => {
-  Admin.find({ _id: req.user.id })
-    .then(user => {
-      const authToken = createAuthToken(user[0]);
-      res.json({ authToken });
-    })
-    .catch(err => {
-      console.error(err);
-      next(err);
-    });
+	Admin.find({ _id: req.user.id })
+		.then(user => {
+			const authToken = createAuthToken(user[0]);
+			res.json({ authToken });
+		})
+		.catch(err => {
+			console.error(err);
+			next(err);
+		});
 });
 
 // Generate AuthToken for user
 
 
 const createAuthToken = (user) => {
-  return jwt.sign({ user }, JWT_SECRET, {
-    subject: user.username,
-    expiresIn: JWT_EXPIRY
-  });
+	return jwt.sign({ user }, JWT_SECRET, {
+		subject: user.username,
+		expiresIn: JWT_EXPIRY
+	});
 };
 
 module.exports = router;
