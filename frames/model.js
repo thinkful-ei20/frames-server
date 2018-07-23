@@ -8,9 +8,12 @@ const frameSchema = new mongoose.Schema({
   endFrame: { type: Date, require: true }
 }, { timestamps: true });
 
+const options = {year: 'numeric', month: '2-digit', day: 'numeric', hour: 'numeric', minute: 'numeric', hc: "h24"};
+
 frameSchema.set('toObject', {
   transform: function (doc, ret) {
     ret.id = ret._id;
+    ret.startFrame = new Date(ret.startFrame).toLocaleString("nl", options);
     delete ret._id;
     delete ret.__v;
   }
