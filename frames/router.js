@@ -111,8 +111,6 @@ router.get('/frame/:id', (req, res, next) => {
 			}
 		})
 		.catch(next);
-
-
 });
 
 // Post/create a frame
@@ -184,9 +182,8 @@ router.put('/frame/:id', (req, res, next) => {
 	Frame.findOneAndUpdate({ _id: frameId, adminId }, updatedShift, {new: true})
 		.then(result => {
 			res.json(result);
-		});
-
-
+		})
+		.catch(next);
 });
 
 // Delete a single frame

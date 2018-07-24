@@ -10,7 +10,7 @@ const jwt = require('jsonwebtoken');
 
 const { TEST_DATABASE_URL, JWT_SECRET } = require('../config');
 
-const Admin = require('../users/models/admin');
+const Frames = require('../frames/model');
 
 const expect = chai.expect;
 chai.use(chaiHttp);
@@ -23,7 +23,7 @@ describe('/api/frames', () => {
 			.then(() => mongoose.connection.db.dropDatabase());
 	});
 	beforeEach(() => {
-		return Admin.createIndexes();
+		return Frames.createIndexes();
 	});
 	afterEach(() => {
 		return mongoose.connection.db.dropDatabase();
