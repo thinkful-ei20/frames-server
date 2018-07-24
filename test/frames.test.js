@@ -193,5 +193,75 @@ describe.only('/api/frames', () => {
 					expect(data.id).to.equal(res.body.id);
 				});
 		});
+
+		it('should not create an object when missing startFrame', () => {
+			return chai.request(app)
+				.post('/api/frames/frame')
+				.send({
+					adminId : user.id,
+					employeeId : employee.id,
+				})
+				.set('Authorization', `Bearer ${token}`)
+				.catch(res => {
+					expect(res).to.have.status(422);
+					expect(res.response.body.message).to.be.equal('Missing startFrame in request body');
+				});
+		});
+
+		it('should throw an error if startFrame is not a string', () => {
+			return chai.request(app)
+				.post('/api/frames/frame/')
+				.send({
+					adminId : user.id,
+					employeeId : employee.id,
+					startFrame : 1234,
+					endFrame: '2018-07-21 11:00:00.000'
+				})
+				.set('Authorization', `Bearer ${token}`)
+				.catch(res => {
+					expect(res).to.have.status(422);
+					expect(res.response.body.message).to.equal('Field: \'startFrame\' must be typeof String');
+				});
+		});
+	});
+
+	describe('PUT /api/frames/frame/:id', () => {
+		it('should update a frame given correct details', () => {
+			let res;
+			return chai.request(app)
+				.put(`/api/frames/frame/${frame.id}`)
+				.send({
+					endFrame: '2018-07-21 11:30:00.000'
+				})
+				.set('Authorization', `Bearer ${token}`)
+				.then( _res => {
+					res = _res;
+					expect(res).to.have.status(200);
+					expect(res.body).to.be.an('object');
+					expect(res.body.startFrame).to.be.a('string');
+					expect(res.body.endFrame).to.be.a('string');
+	
+					return Frame.findById(frame.id);
+				}).then(data => {
+					expect(data.adminId.toString()).to.equal(res.body.adminId);
+					expect(data.employeeId.toString()).to.equal(res.body.employeeId);
+					expect(data.id).to.equal(res.body.id);
+				});
+		});
+
+		it('should not update a frame when given incorrect ID', () => {
+			return chai.request(app)
+				.put('/api/frames/frame/notanid')
+				.send({
+					endFrame: '2018-07-21 11:30:00.000'
+				})
+				.set('Authorization', `Bearer ${token}`)
+				.catch(res => {
+					expect(res).to.have.status(400);
+					expect(res.response.body.message).to.be.equal('The frame id notanid is not valid');
+				});
+		});
+
+		
 	});
 });
