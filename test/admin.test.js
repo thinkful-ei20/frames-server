@@ -16,7 +16,7 @@ const expect = chai.expect;
 chai.use(chaiHttp);
 chai.use(chaiExclude);
 
-describe.only('/api/admin', () => {
+describe('/api/admin', () => {
 	const _id = '333333333333333333333333';
 	const username = 'exampleuser';
 	const email = 'example@test.com';
