@@ -128,10 +128,9 @@ router.delete('/:adminId', (req, res, next) => {
 
 	Admin.findOneAndRemove({ _id: adminId })
 		.then(() => {
-			res.json({
+			return res.status(204).json({
 				message: 'Deleted Admin user'
 			});
-			res.status(204).end();
 		})
 		.catch(err => {
 			console.error(err);
