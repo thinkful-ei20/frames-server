@@ -163,13 +163,78 @@ describe.only('/api/admin', () => {
 
 			return chai.request(app)
 				.put(`/api/admin/${user.id}`)
-				.send({username : 'mynewadminuser'})
+				.send({username : 'mycoolusername'})
 				.set('Authorization', `Bearer ${token}`)
 				.then(_res => {
 					res = _res;
-					console.log(res.body);
+					expect(res).to.have.status(200);
+					expect(res.body).to.be.an('object');
+
+					return Admin.findById(user.id);
 				})
+				.then(data => {
+					expect(res.body.username).to.equal(data.username);
+					expect(res.body.email).to.equal(data.email);
+					expect(res.body.companyName).to.equal(data.companyName);
+					expect(res.body.phoneNumber).to.equal(data.phoneNumber);
+					expect(res.body.id).to.equal(data.id);
+				});
 		});
+
+		it('should not update the user if adminId is not valid', () => {
+			return chai.request(app)
+				.put('/api/admin/notanid')
+				.set('Authorization', `Bearer ${token}`)
+				.catch(res => {
+					expect(res).to.have.status(400);
+					expect(res.response.body.message).to.equal('The `id` is not valid');
+				});
+		});
+
+		it('should not update the user if username is not a string', () => {
+			return chai.request(app)
+				.put(`/api/admin/${user.id}`)
+				.send({'username': 123})
+				.set('Authorization', `Bearer ${token}`)
+				.catch(res => {
+					expect(res).to.have.status(422);
+					expect(res.response.body.message).to.equal('Field: \'username\' must be typeof String');
+				});
+		});
+
+		it('should not update the user if phoneNumber is not a number', () => {
+			return chai.request(app)
+				.put(`/api/admin/${user.id}`)
+				.send({'phoneNumber': '123'})
+				.set('Authorization', `Bearer ${token}`)
+				.catch(res => {
+					expect(res).to.have.status(422);
+					expect(res.response.body.message).to.equal('Field: \'phoneNumber\' must be typeof Number');
+				});
+		});
+
+		it('should not update the user username is not trimmed', () => {
+			return chai.request(app)
+				.put(`/api/admin/${user.id}`)
+				.send({'username': 'nyupdatedemployee '})
+				.set('Authorization', `Bearer ${token}`)
+				.catch(res => {
+					expect(res).to.have.status(422);
+					expect(res.response.body.message).to.equal('Field: \'username\' cannot start or end with a whitespace!');
+				});
+		});
+
+		it('should not update the user if username is too short', () => {
+			return chai.request(app)
+				.put(`/api/admin/${user.id}`)
+				.send({'username': ''})
+				.set('Authorization', `Bearer ${token}`)
+				.catch(res => {
+					expect(res).to.have.status(422);
+					expect(res.response.body.message).to.equal('Field: \'username\' must be at least 1 characters long');
+				});
+		});
+
 	});
 
 	describe('DELETE /api/admin/:adminId', () => {
