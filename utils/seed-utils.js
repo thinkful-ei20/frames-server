@@ -1,9 +1,11 @@
 
 const faker = require('faker');
 const mongoose = require('mongoose');
+const moment = require('moment');
 
-const ADMIN_TOTAL = 10;
-const EMPLOYEE_TOTAL = 20;
+const ADMIN_TOTAL = 1;
+const EMPLOYEE_TOTAL = 5;
+const FRAMES_TOTAL = 5;
 
 // HS256 generated password
 const test_password = '$2a$10$tZ.k8k41b9OjHDN.U/DHWuz7OUjPW8sX0zGytKzndhaIl/rJQMihe'; // password: password10;
@@ -41,7 +43,31 @@ const generateEmployees = (adminId, total = EMPLOYEE_TOTAL) => {
 	}
 	return Promise.all(employees)
 		.then(values => {
-			console.log('THATS ONE!',employees);
+			return values;
+		})
+		.catch(err => {
+			console.error(err);
+		});
+};
+
+const generateFrames = (employees, total = FRAMES_TOTAL) => {
+	const frames = [];
+	let rand_i;
+	let start;
+	let end;
+	for(let i = 0; i < total; i++) {
+		rand_i = Math.floor(Math.random() * (employees.length));
+		start = new Date(Date.now());
+		end = new Date(start.getUTCHours() + 6);
+		frames.push({
+			adminId: employees[rand_i].adminId,
+			employeeId: employees[rand_i].id,
+			startFrame: start.toISOString(),
+			endFrame:	end.toISOString()
+		});
+	}
+	return Promise.all(frames)
+		.then(values => {
 			return values;
 		})
 		.catch(err => {
@@ -50,4 +76,4 @@ const generateEmployees = (adminId, total = EMPLOYEE_TOTAL) => {
 };
 
 
-module.exports = {generateAdmins, generateEmployees};
+module.exports = {generateAdmins, generateEmployees, generateFrames};
