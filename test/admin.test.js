@@ -32,7 +32,6 @@ describe('/api/admin', () => {
 			.then(() => mongoose.connection.db.dropDatabase());
 	});
 	beforeEach(() => {
-		// return Admin.createIndexes();
 		return Admin.create({
 			username : 'exampleuser123',
 			email : 'example123@test.com',
