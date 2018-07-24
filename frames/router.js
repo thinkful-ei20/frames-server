@@ -31,7 +31,7 @@ router.get('/', (req, res, next) => {
 
 	const filter = { adminId };
 
-  // result: { $and: [ { $gt: [ "$qty", 100 ] }, { $lt: [ "$qty", 250 ] } ] }
+	// result: { $and: [ { $gt: [ "$qty", 100 ] }, { $lt: [ "$qty", 250 ] } ] }
 
 	// Only filter on startDate and endDate if they are provided
 	if(startDate) {
@@ -44,7 +44,7 @@ router.get('/', (req, res, next) => {
 
 	Frame.find(filter)
 		.populate('employeeId')
-    .sort({'startFrame': 1})
+		.sort({'startFrame': 1})
 		.then(results => {
 			if(results.length) {
 
@@ -118,17 +118,22 @@ router.get('/frame/:id', (req, res, next) => {
 // Post/create a frame
 router.post('/frame', (req, res, next) => {
 
-	const requiredFields = ['employeeId', 'startFrame', 'endFrame'];
+	const { employeeId = null, startFrame, endFrame } = req.body;
+
+	const requiredFields = ['startFrame', 'endFrame'];
 	const missingField = requiredFields.find(field => !(field in req.body));
 
 	if (missingField) {
 		const err = new Error(`Missing ${missingField} in request body`);
 		err.status = 422;
-		console.error(err);
 		return next(err);
 	}
 
-	const stringFields = ['employeeId', 'startFrame', 'endFrame'];
+	let stringFields = ['employeeId','startFrame', 'endFrame'];
+	if(!employeeId) {
+		stringFields = ['startFrame', 'endFrame'];
+	}
+
 	const nonStringField = stringFields.find(
 		field => (field in req.body && typeof req.body[field]) !== 'string'
 	);
@@ -140,9 +145,7 @@ router.post('/frame', (req, res, next) => {
 		return next(err);
 	}
 
-
 	const adminId = req.user.id;
-	const { employeeId, startFrame, endFrame } = req.body;
 
 	const frame = {
 		adminId,
@@ -151,7 +154,6 @@ router.post('/frame', (req, res, next) => {
 		endFrame
 	};
 
-	console.log('FRAME', frame);
 	Frame.create(frame)
 		.then(result => {
 			res.location(`${req.originalUrl}/${result.id}`).status(201).json(result);
@@ -161,16 +163,16 @@ router.post('/frame', (req, res, next) => {
 
 // Update a single frame
 router.put('/frame/:id', (req, res, next) => {
-    console.log('START DATE', req.body.startFrame);
-    const adminId = req.user.id;
-    const frameId = req.params.id;
-    const updateableFields = ['startFrame', 'endFrame', 'employeeId'];
-    const updatedShift = {};
-    updateableFields.map(field => {
-      if (field in req.body){
-        updatedShift[field] = req.body[field];
-      }
-    });
+	// console.log('START DATE', req.body.startFrame);
+	const adminId = req.user.id;
+	const frameId = req.params.id;
+	const updateableFields = ['startFrame', 'endFrame', 'employeeId'];
+	const updatedShift = {};
+	updateableFields.map(field => {
+		if (field in req.body){
+			updatedShift[field] = req.body[field];
+		}
+	});
 
 	/***** Never trust users - validate input *****/
 	if (!mongoose.Types.ObjectId.isValid(frameId)) {
