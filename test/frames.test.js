@@ -165,4 +165,33 @@ describe.only('/api/frames', () => {
 				});
 		});
 	});
+
+	describe('POST /api/frames/frame/', () => {
+		it('should create a frame given correct info', () => {
+			let res;
+
+			return chai.request(app)
+				.post('/api/frames/frame')
+				.send({
+					adminId : user.id,
+					employeeId : employee.id,
+					startFrame : '2018-07-21 10:00:00.000',
+					endFrame: '2018-07-21 11:00:00.000'
+				})
+				.set('Authorization', `Bearer ${token}`)
+				.then( _res => {
+					res = _res;
+					expect(res).to.have.status(201);
+					expect(res.body).to.be.an('object');
+					expect(res.body.startFrame).to.be.a('string');
+					expect(res.body.endFrame).to.be.a('string');
+
+					return Frame.findById(res.body.id);
+				}).then(data => {
+					expect(data.adminId.toString()).to.equal(res.body.adminId);
+					expect(data.employeeId.toString()).to.equal(res.body.employeeId);
+					expect(data.id).to.equal(res.body.id);
+				});
+		});
+	});
 });
