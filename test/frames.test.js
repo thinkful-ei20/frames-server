@@ -30,6 +30,7 @@ describe('/api/frames', () => {
 			.then(() => mongoose.connection.db.dropDatabase());
 	});
 	beforeEach(() => {
+
 		return Admin.create({
 			username : 'exampleuser123',
 			email : 'example123@test.com',
@@ -71,6 +72,7 @@ describe('/api/frames', () => {
 					Frame.createIndexes()
 				]);
 			});
+
 	});
 	afterEach(() => {
 		return mongoose.connection.db.dropDatabase();

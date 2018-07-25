@@ -1,9 +1,6 @@
 
 /** api/auth/login test */
 
-// it('', () => {
-// });
-
 require('dotenv').config();
 
 const { app } = require('../index');
