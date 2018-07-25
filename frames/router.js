@@ -139,7 +139,6 @@ router.post('/frame', (req, res, next) => {
 	if (nonStringField) {
 		const err = new Error(`Field: '${nonStringField}' must be typeof String`);
 		err.status = 422;
-		console.error(err);
 		return next(err);
 	}
 
@@ -171,8 +170,7 @@ router.put('/frame/:id', (req, res, next) => {
 			updatedShift[field] = req.body[field];
 		}
 	});
-
-	/***** Never trust users - validate input *****/
+	
 	if (!mongoose.Types.ObjectId.isValid(frameId)) {
 		const err = new Error(`The frame id ${frameId} is not valid`);
 		err.status = 400;

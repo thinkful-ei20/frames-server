@@ -128,10 +128,9 @@ router.delete('/:adminId', (req, res, next) => {
 
 	Admin.findOneAndRemove({ _id: adminId })
 		.then(() => {
-			res.json({
+			return res.status(204).json({
 				message: 'Deleted Admin user'
 			});
-			res.status(204).end();
 		})
 		.catch(err => {
 			console.error(err);
@@ -194,7 +193,6 @@ router.put('/:adminId', (req, res, next) => {
 	if (nonStringField) {
 		const err = new Error(`Field: '${nonStringField}' must be typeof String`);
 		err.status = 422;
-		console.error(err);
 		return next(err);
 	}
 
@@ -204,21 +202,23 @@ router.put('/:adminId', (req, res, next) => {
 	);
 
 	if (nonNumField) {
-		const err = new Error(`Field: '${nonStringField}' must be typeof Number`);
+		const err = new Error(`Field: '${nonNumField}' must be typeof Number`);
 		err.status = 422;
-		console.error(err);
 		return next(err);
 	}
 
+
 	const trimmedFields = ['username', 'email', 'companyName'];
-	const nonTrimmedField = trimmedFields.find(field =>
-		updatedAdmin[field].trim() !== updatedAdmin[field]
-	);
+
+	const nonTrimmedField = trimmedFields.find(field => {
+		if (field in updatedAdmin){
+			return updatedAdmin[field].trim() !== updatedAdmin[field];
+		}
+	});
 
 	if (nonTrimmedField) {
 		const err = new Error(`Field: '${nonTrimmedField}' cannot start or end with a whitespace!`);
 		err.status = 422;
-		console.error(err);
 		return next(err);
 	}
 
@@ -229,15 +229,16 @@ router.put('/:adminId', (req, res, next) => {
 	};
 
 	const tooSmall = Object.keys(sizedFields).find(field => {
-		'min' in sizedFields[field]
-    &&
-    updatedAdmin[field].trim().length < sizedFields[field].min;
+		if (field in updatedAdmin){
+			return sizedFields[field]['min'] > updatedAdmin[field].length;
+		}
 	});
+
+
 	if (tooSmall) {
 		const min = sizedFields[tooSmall].min;
 		const err = new Error(`Field: '${tooSmall}' must be at least ${min} characters long`);
 		err.status = 422;
-		console.error(err);
 		return next(err);
 	}
 
