@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const moment = require('moment');
 
 // Define Frames Schema & Frames Model
 const frameSchema = new mongoose.Schema({
@@ -13,8 +14,8 @@ const options = {year: 'numeric', month: '2-digit', day: 'numeric', hour: 'numer
 frameSchema.set('toObject', {
 	transform: function (doc, ret) {
 		ret.id = ret._id;
-		ret.startFrame = new Date(ret.startFrame).toLocaleString('nl', options);
-		ret.endFrame = new Date(ret.endFrame).toLocaleString('nl', options);
+		ret.startFrame = moment(ret.startFrame);
+		ret.endFrame = moment(ret.endFrame);
 		delete ret._id;
 		delete ret.__v;
 	}
