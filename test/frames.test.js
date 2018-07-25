@@ -18,7 +18,7 @@ const expect = chai.expect;
 chai.use(chaiHttp);
 chai.use(chaiExclude);
 
-describe.only('/api/frames', () => {
+describe('/api/frames', () => {
 
 	let token;
 	let user;

@@ -3,12 +3,13 @@
 const router = require('express').Router();
 const passport = require('passport');
 const Employee = require('../models/employee');
-
+console.log('HELLLO');
 // Protect endpoints using JWT Strategy
 router.use('/', passport.authenticate('jwt', { session: false, failWithError: true }));
 
 // Get all employees
 router.get('/', (req, res, next) => {
+	console.log('UUUUUUUUUUUUUUSER', req.user.id);
 	const adminId = req.user.id;
 
 	Employee.find({adminId})
