@@ -1,3 +1,4 @@
+
 require('dotenv').config();
 
 const { app } = require('../index');
@@ -9,104 +10,160 @@ const jwt = require('jsonwebtoken');
 
 const { TEST_DATABASE_URL, JWT_SECRET } = require('../config');
 
-const Employee = require('../users/models/employee');
 const Admin = require('../users/models/admin');
+const Employee = require('../users/models/employee');
+const Frame = require('../frames/model');
 
 const expect = chai.expect;
 chai.use(chaiHttp);
 chai.use(chaiExclude);
 
-describe.only('FRAMES - Employee', () => {
-  const dummyEmployee = {
-    firstname: 'Firstname',
-    lastname: 'Lastname',
-    img: 'image.png',
-    email: 'example@test.com',
-    password: 'password123',
-    phoneNumber: 2225551111
-  };
+describe.only('/api/frames', () => {
 
-  const dummyAdmin = {
-    username : 'exampleuser123',
-    email : 'example123@test.com',
-    companyName : 'merntalists',
-    password : 'password123',
-    phoneNumber : 2225551111
-  };
+	let token;
+	let user;
+	let employee;
+	let frame;
 
-  let token;
-  let admin;
-  let employee;
+	before(() => {
+		return mongoose.connect(TEST_DATABASE_URL)
+			.then(() => mongoose.connection.db.dropDatabase());
+	});
+	beforeEach(() => {
+		return Admin.create({
+			username : 'exampleuser123',
+			email : 'example123@test.com',
+			companyName : 'merntalists',
+			password : 'password123',
+			phoneNumber : 2225551111
+		})
+			.then(curruser => {
+				user = curruser;
+				token = jwt.sign(
+					{user},
+					JWT_SECRET,
+					{subject : user.username});
 
+				return Employee.create({
+					firstname : 'Jane',
+					lastname : 'Doe',
+					img : 'jane.jpg',
+					email : 'janesemail@test.com',
+					adminId : user.id,
+					password : 'test pass',
+					phoneNumber: 1231231234
+				});
+			})
+			.then(curremployee => {
+				employee = curremployee;
+				return Frame.create({
+					adminId : user.id,
+					employeeId : employee.id,
+					startFrame : '2018-06-18 10:00',
+					endFrame : '2018-06-18 11:00'
+				});
+			})
+			.then(currframe => {
+				frame = currframe;
+				return Promise.all([
+					Admin.createIndexes(),
+					Employee.createIndexes(),
+					Frame.createIndexes()
+				]);
+			});
+	});
+	afterEach(() => {
+		return mongoose.connection.db.dropDatabase();
+	});
+	after(() => {
+		return mongoose.disconnect();
+	});
 
-  before(() => {
-    return mongoose.connect(TEST_DATABASE_URL)
-      .then(() => mongoose.connection.db.dropDatabase());
-  });
+	describe.only('GET ALL /api/employee', () => {
+		it('should return all employees for this user', () => {
+			let res;
 
-  beforeEach(() => {
-    return Promise.all([
-      Admin.hashPassword(dummyAdmin.password),
-      Employee.hashPassword(dummyEmployee.password)
-    ])
-      .then(([ adminHash, employeeHash ]) => {
-      console.log('ADMIN HASH', adminHash);
-      dummyAdmin.password = adminHash;
-      dummyEmployee.password = employeeHash;
-      return Admin.create(dummyAdmin);
-    })
-      .then(currAdmin => {
-        admin = currAdmin;
-        console.log('ADMIN', admin);
-        token = jwt.sign(
-          {admin},
-          JWT_SECRET,
-          {subject : admin.username});
-        dummyEmployee.adminId = admin.id;
-        return Employee.create(dummyEmployee);
-      })
-      .then(currEmployee => {
-        employee = currEmployee;
-        return Promise.all([Admin.createIndexes(), Employee.createIndexes()])
-      })
-  });
+			return chai.request(app)
+				.get('/api/employee')
+				.set('Authorization', `Bearer ${token}`)
+				.then(_res => {
+          res = _res;
+          console.log(res.body);
+				// 	expect(res).to.have.status(200);
+				// 	expect(res.body).to.be.an('array');
+				// 	expect(res.body[0].startFrame).to.be.a('string');
+				// 	expect(res.body[0].endFrame).to.be.a('string');
 
-  afterEach(() => {
-    return mongoose.connection.db.dropDatabase();
-  });
+				// 	return Frame.find({adminId : user.id});
+				// })
+				// .then(([data]) => {
+				// 	const result = res.body[0];
+				// 	expect(data.adminId.toString()).to.equal(result.adminId);
+				// 	expect(data.employeeId.toString()).to.equal(result.employeeId.id);
+				// 	expect(data.id).to.equal(result.id);
+				});
+		});
+	});
 
-  after(() => {
-    return mongoose.disconnect();
-  });
+	describe('GET ALL frames for one employee /api/employee/:employeeId', () => {
+		it('should return all frames assigned to to that employee', () => {
+			let res;
 
-  describe('GET /api/employee', () => {
-    it('should return an array of all employees', () => {
-      let res;
-      console.log('ADMIN', admin);
-      console.log('EMPLOYEE', employee);
+			return chai.request(app)
+				.get(`/api/frames/${employee.id}`)
+				.set('Authorization', `Bearer ${token}`)
+				.then(_res => {
+					res = _res;
+					expect(res).to.have.status(200);
+					expect(res.body).to.be.an('array');
+					expect(res.body[0].startFrame).to.be.a('string');
+					expect(res.body[0].endFrame).to.be.a('string');
 
-      return chai.request(app)
-        .get('/api/employee')
-        .set('Authorization', `Bearer ${token}`)
-        .then(_res => {
+					return Frame.find({
+						adminId : user.id,
+						employeeId : employee.id
+					});
+				})
+				.then(([data]) => {
+					const result = res.body[0];
+					expect(data.adminId.toString()).to.equal(result.adminId);
+					expect(data.employeeId.toString()).to.equal(result.employeeId);
+					expect(data.id).to.equal(result.id);
+				});
+		});
+	});
 
-          console.log('RESSSSS', _res);
-          // res = _res;
-          // expect(res).to.have.status(200);
-          // expect(res).to.be.json;
-          // expect(res.body).to.be.an('array');
-          // expect(res.body).to.have.length()
-          //
-          // return Admin.find();
-        // })
-        // .then(data => {
-        //   expect(res.body[0]['username']).to.be.equal(data[0]['username']);
-        //   expect(res.body[0]['email']).to.be.equal(data[0]['email']);
-        //   expect(res.body[0]['companyName']).to.be.equal(data[0]['companyName']);
-        //   expect(res.body[0]['phoneNumber']).to.be.equal(data[0]['phoneNumber']);
-        //   expect(res.body[0]['id']).to.be.equal(data[0]['id']);
-        });
-    });
-  });
+	describe('GET BY ID /api/frames/frame/:id', () => {
+		it('should return a single frame given a correct ID', () => {
+			let res;
 
+			return chai.request(app)
+				.get(`/api/frames/frame/${frame.id}`)
+				.set('Authorization', `Bearer ${token}`)
+				.then(_res => {
+					res = _res;
+					expect(res).to.have.status(200);
+					expect(res).to.be.an('object');
+					expect(res.body.startFrame).to.be.a('string');
+					expect(res.body.endFrame).to.be.a('string');
+
+					return Frame.findById(frame.id);
+				})
+				.then(data => {
+					expect(data.adminId.toString()).to.equal(res.body.adminId);
+					expect(data.employeeId.toString()).to.equal(res.body.employeeId);
+					expect(data.id).to.equal(res.body.id);
+				});
+		});
+
+		it('should throw an error if given incorrect id', () => {
+			return chai.request(app)
+				.get('/api/frames/frame/notanid')
+				.set('Authorization', `Bearer ${token}`)
+				.catch(res => {
+					expect(res).to.have.status(400);
+					expect(res.response.body.message).to.equal('The frame id notanid is not valid');
+				});
+		});
+	});
 });
