@@ -240,7 +240,7 @@ describe.only('/api/frames', () => {
 					expect(res.body).to.be.an('object');
 					expect(res.body.startFrame).to.be.a('string');
 					expect(res.body.endFrame).to.be.a('string');
-	
+
 					return Frame.findById(frame.id);
 				}).then(data => {
 					expect(data.adminId.toString()).to.equal(res.body.adminId);
@@ -261,7 +261,31 @@ describe.only('/api/frames', () => {
 					expect(res.response.body.message).to.be.equal('The frame id notanid is not valid');
 				});
 		});
+	});
 
-		
+	describe('DELETE /api/frames/frame/:id', () => {
+		it('should delete a frame given correct Id', () => {
+			return chai.request(app)
+				.delete(`/api/frames/frame/${frame.id}`)
+				.set('Authorization', `Bearer ${token}`)
+				.then(res => {
+					expect(res).to.have.status(204);
+
+					return Frame.findById(frame.id);
+				})
+				.then(data => {
+					expect(data).to.equal(null);
+				});
+		});
+
+		it('should not delete a frame given invalid Id', () => {
+			return chai.request(app)
+				.delete('/api/frames/frame/notanid')
+				.set('Authorization', `Bearer ${token}`)
+				.catch(res => {
+					expect(res).to.have.status(400);
+					expect(res.response.body.message).to.equal('The frame id notanid is not valid');
+				});
+		});
 	});
 });
