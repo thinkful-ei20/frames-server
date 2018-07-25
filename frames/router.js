@@ -151,6 +151,15 @@ router.post('/frame', (req, res, next) => {
 		endFrame
 	};
 
+	//Check that end frame is later than start frame
+	const start = new Date(startFrame);
+	const end = new Date(endFrame);
+	if(start > end){
+		const err = new Error('endFrame must be later than startFrame');
+		err.status = 422;
+		return next(err);
+	}
+
 	Frame.create(frame)
 		.then(result => {
 			res.location(`${req.originalUrl}/${result.id}`).status(201).json(result);
@@ -170,11 +179,22 @@ router.put('/frame/:id', (req, res, next) => {
 			updatedShift[field] = req.body[field];
 		}
 	});
-	
+
 	if (!mongoose.Types.ObjectId.isValid(frameId)) {
 		const err = new Error(`The frame id ${frameId} is not valid`);
 		err.status = 400;
 		return next(err);
+	}
+
+	// Check that end frame is later than start frame
+	if(updatedShift.startFrame && updatedShift.endFrame){
+		const start = new Date(updatedShift.startFrame);
+		const end = new Date(updatedShift.endFrame);
+		if(start > end){
+			const err = new Error('endFrame must be later than startFrame');
+			err.status = 422;
+			return next(err);
+		}
 	}
 
 	Frame.findOneAndUpdate({ _id: frameId, adminId }, updatedShift, {new: true})
