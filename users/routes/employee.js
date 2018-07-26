@@ -1,4 +1,4 @@
-'use strict';
+
 
 const router = require('express').Router();
 const passport = require('passport');
@@ -25,12 +25,12 @@ router.get('/:employeeId', (req,res,next) => {
 	const adminId = req.user.id;
 	const {employeeId} = req.params;
 
-  /***** Never trust users - validate input *****/
-  if (!mongoose.Types.ObjectId.isValid(employeeId)) {
-  	const err = new Error(`The employee id ${employeeId} is not valid`);
-    err.status = 400;
-    return next(err);
-  }
+	/***** Never trust users - validate input *****/
+	if (!mongoose.Types.ObjectId.isValid(employeeId)) {
+		const err = new Error(`The employee id ${employeeId} is not valid`);
+		err.status = 400;
+		return next(err);
+	}
 
 	Employee.findOne({_id : employeeId, adminId})
 		.then(result => {
@@ -44,17 +44,17 @@ router.get('/:employeeId', (req,res,next) => {
 
 // Update an existing employee
 router.put('/:employeeId', (req, res, next) => {
-  const {employeeId} = req.params;
-  const updatedEmployee = {
+	const {employeeId} = req.params;
+	const updatedEmployee = {
 		adminId : req.user.id
 	};
 
-  /***** Never trust users - validate input *****/
-  if (!mongoose.Types.ObjectId.isValid(employeeId)) {
-    const err = new Error(`The employee id ${employeeId} is not valid`);
-    err.status = 400;
-    return next(err);
-  }
+	/***** Never trust users - validate input *****/
+	if (!mongoose.Types.ObjectId.isValid(employeeId)) {
+		const err = new Error(`The employee id ${employeeId} is not valid`);
+		err.status = 400;
+		return next(err);
+	}
 
 	// Only add fields that can be updated to updatedEmployee object
 	const employeeFields = ['firstname', 'lastname', 'img', 'email', 'phoneNumber', 'password'];
@@ -67,30 +67,30 @@ router.put('/:employeeId', (req, res, next) => {
 	// Check that all string fields are strings
 	const stringFields = ['firstname', 'lastname', 'img', 'email', 'password', 'phoneNumber'];
 
-  const nonStringField = stringFields.find(field =>
-    field in updatedEmployee && typeof updatedEmployee[field] !== 'string'
-  );
+	const nonStringField = stringFields.find(field =>
+		field in updatedEmployee && typeof updatedEmployee[field] !== 'string'
+	);
 
-  if (nonStringField) {
-    const err = new Error(`Field: '${nonStringField}' must be typeof String`);
-    err.status = 422;
-    return next(err);
-  }
+	if (nonStringField) {
+		const err = new Error(`Field: '${nonStringField}' must be typeof String`);
+		err.status = 422;
+		return next(err);
+	}
 
 	// Check that fields are trimmed as needed
-  const trimmedFields = ['password', 'email'];
+	const trimmedFields = ['password', 'email'];
 
-  const nonTrimmedField = trimmedFields.find(field => {
-    if (field in updatedEmployee){
-      return updatedEmployee[field].trim() !== updatedEmployee[field];
-    }
-  });
+	const nonTrimmedField = trimmedFields.find(field => {
+		if (field in updatedEmployee){
+			return updatedEmployee[field].trim() !== updatedEmployee[field];
+		}
+	});
 
-  if (nonTrimmedField) {
-    const err = new Error(`Field: '${nonTrimmedField}' cannot start or end with a whitespace!`);
-    err.status = 422;
-    return next(err);
-  }
+	if (nonTrimmedField) {
+		const err = new Error(`Field: '${nonTrimmedField}' cannot start or end with a whitespace!`);
+		err.status = 422;
+		return next(err);
+	}
 
 	// Check that password is long enough
 	if (updatedEmployee.password && updatedEmployee.password < 8){
@@ -109,13 +109,13 @@ router.put('/:employeeId', (req, res, next) => {
 			}
 			return next();
 		})
-    .catch(err => {
-      if (err.code === 11000) {
-        err = new Error('Email already exists');
-        err.status = 400;
-      }
-      next(err);
-    });
+		.catch(err => {
+			if (err.code === 11000) {
+				err = new Error('Email already exists');
+				err.status = 400;
+			}
+			next(err);
+		});
 });
 
 // Create a new employee
@@ -132,7 +132,7 @@ router.post('/', (req,res,next) => {
 		}
 	});
 
-  // Check that all required fields are present
+	// Check that all required fields are present
 	const requiredFields = ['email', 'password', 'phoneNumber'];
 
 	const missingField = requiredFields.find(field => !(field in req.body));
@@ -144,41 +144,41 @@ router.post('/', (req,res,next) => {
 	}
 
 	// Check that all string fields are strings
-  const stringFields = ['firstname', 'lastname', 'img', 'email', 'password', 'phoneNumber'];
+	const stringFields = ['firstname', 'lastname', 'img', 'email', 'password', 'phoneNumber'];
 
-  const nonStringField = stringFields.find(field =>
-    field in newEmployee && typeof newEmployee[field] !== 'string'
-  );
+	const nonStringField = stringFields.find(field =>
+		field in newEmployee && typeof newEmployee[field] !== 'string'
+	);
 
-  if (nonStringField) {
-    const err = new Error(`Field: '${nonStringField}' must be typeof String`);
-    err.status = 422;
-    return next(err);
-  }
+	if (nonStringField) {
+		const err = new Error(`Field: '${nonStringField}' must be typeof String`);
+		err.status = 422;
+		return next(err);
+	}
 
-  // Check that fields are trimmed as needed
-  const trimmedFields = ['password', 'email'];
+	// Check that fields are trimmed as needed
+	const trimmedFields = ['password', 'email'];
 
-  const nonTrimmedField = trimmedFields.find(field => {
-    if (field in newEmployee){
-      return newEmployee[field].trim() !== newEmployee[field];
-    }
-  });
+	const nonTrimmedField = trimmedFields.find(field => {
+		if (field in newEmployee){
+			return newEmployee[field].trim() !== newEmployee[field];
+		}
+	});
 
-  if (nonTrimmedField) {
-    const err = new Error(`Field: '${nonTrimmedField}' cannot start or end with a whitespace!`);
-    err.status = 422;
-    return next(err);
-  }
+	if (nonTrimmedField) {
+		const err = new Error(`Field: '${nonTrimmedField}' cannot start or end with a whitespace!`);
+		err.status = 422;
+		return next(err);
+	}
 
 	// Check that fields are as long/short as they need to be
 	const sizedFields = {
 		password: { min: 8, max: 72 }
 	};
 
-  const tooSmall = Object.keys(sizedFields).find(field =>
-    'min' in sizedFields[field] && req.body[field].length < sizedFields[field].min
-  );
+	const tooSmall = Object.keys(sizedFields).find(field =>
+		'min' in sizedFields[field] && req.body[field].length < sizedFields[field].min
+	);
 
 	if (tooSmall) {
 		const min = sizedFields[tooSmall].min;
@@ -199,19 +199,26 @@ router.post('/', (req,res,next) => {
 	}
 
 	// Make request to backend
-	Employee.create(newEmployee)
-		.then(result => {
-      return res.status(201)
-        .location(`/api/admin/${result.id}`)
-        .json(result);
+	return Employee.hashPassword(newEmployee.password)
+		.then(digest => {
+			const employee = {
+				...newEmployee,
+				password: digest
+			};
+			return Employee.create(employee);
 		})
-    .catch(err => {
-      if (err.code === 11000) {
-        err = new Error('Email already exists');
-        err.status = 400;
-      }
-      next(err);
-    });
+		.then(result => {
+			return res.status(201)
+				.location(`/api/employee/${result.id}`)
+				.json(result);
+		})
+		.catch(err => {
+			if (err.code === 11000) {
+				err = new Error('Email already exists');
+				err.status = 400;
+			}
+			return next(err);
+		});
 
 });
 

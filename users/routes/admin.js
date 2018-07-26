@@ -11,8 +11,8 @@ const router = express.Router();
 // CREATE NEW ADMIN
 router.post('/', (req, res, next) => {
 
-  // Check that all required fields are present
-  const requiredFields = ['username', 'email', 'companyName', 'password', 'phoneNumber'];
+	// Check that all required fields are present
+	const requiredFields = ['username', 'email', 'companyName', 'password', 'phoneNumber'];
 	const missingField = requiredFields.find(field => !(field in req.body));
 
 	if (missingField) {
@@ -22,8 +22,8 @@ router.post('/', (req, res, next) => {
 		return next(err);
 	}
 
-  // Check that all string fields are strings
-  const stringFields = ['username', 'email', 'companyName', 'password'];
+	// Check that all string fields are strings
+	const stringFields = ['username', 'email', 'companyName', 'password'];
 	const nonStringField = stringFields.find(field => {
 		field in req.body && typeof req.body[field] !== 'string';
 	});
@@ -35,8 +35,8 @@ router.post('/', (req, res, next) => {
 		return next(err);
 	}
 
-  // Check that fields are trimmed as needed
-  const trimmedFields = ['username', 'email', 'companyName', 'password', 'phoneNumber'];
+	// Check that fields are trimmed as needed
+	const trimmedFields = ['username', 'email', 'companyName', 'password', 'phoneNumber'];
 	const nonTrimmedField = trimmedFields.find(field => {
 		req.body[field].trim() !== req.body[field];
 	});
@@ -200,7 +200,7 @@ router.put('/:adminId', (req, res, next) => {
 		return next(err);
 	}
 
-	const trimmedFields = ['username', 'email', 'companyName', 'phoneNumber';
+	const trimmedFields = ['username', 'email', 'companyName', 'phoneNumber'];
 
 	const nonTrimmedField = trimmedFields.find(field => {
 		if (field in updatedAdmin){
@@ -261,13 +261,13 @@ router.put('/:adminId', (req, res, next) => {
 				next();
 			}
 		})
-    .catch(err => {
-      if (err.code === 11000) {
-        err = new Error('Email already exists');
-        err.status = 400;
-      }
-      next(err);
-    });
+		.catch(err => {
+			if (err.code === 11000) {
+				err = new Error('Email already exists');
+				err.status = 400;
+			}
+			next(err);
+		});
 });
 
 module.exports = router;
