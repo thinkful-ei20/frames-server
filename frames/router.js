@@ -111,8 +111,6 @@ router.get('/frame/:id', (req, res, next) => {
 			}
 		})
 		.catch(next);
-
-
 });
 
 // Post/create a frame
@@ -183,8 +181,6 @@ router.put('/frame/:id', (req, res, next) => {
 		.then(result => {
 			res.json(result);
 		});
-
-
 });
 
 // Delete a single frame
