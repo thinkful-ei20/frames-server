@@ -200,7 +200,7 @@ router.put('/:adminId', (req, res, next) => {
 		return next(err);
 	}
 
-	const trimmedFields = ['username', 'email', 'companyName', 'phoneNumber';
+	const trimmedFields = ['username', 'email', 'companyName', 'phoneNumber'];
 
 	const nonTrimmedField = trimmedFields.find(field => {
 		if (field in updatedAdmin){
