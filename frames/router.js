@@ -44,11 +44,7 @@ router.get('/', (req, res, next) => {
 		.populate('employeeId')
 		.sort({'startFrame': 1})
 		.then(results => {
-			if(results.length) {
-				res.json(results);
-			} else {
-				next();
-			}
+			res.json(results);
 		})
 		.catch(err => {
 			next(err);
