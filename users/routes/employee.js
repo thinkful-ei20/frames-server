@@ -15,11 +15,7 @@ router.get('/', (req, res, next) => {
 	Employee.find({adminId})
 		.sort('lastname')
 		.then(result => {
-			if(result.length) {
-				res.json(result);
-			} else {
-				next();
-			}
+			res.json(result);
 		})
 		.catch(next);
 });
