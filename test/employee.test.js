@@ -23,7 +23,7 @@ describe('Employee - /api/employee', () => {
     img: 'image.png',
     email: 'example@test.com',
     password: 'password123',
-    phoneNumber: 2225551111
+    phoneNumber: '2225551111'
   };
 
   const dummyAdmin = {
@@ -31,7 +31,7 @@ describe('Employee - /api/employee', () => {
     email : 'example123@test.com',
     companyName : 'merntalists',
     password : 'password123',
-    phoneNumber : 2225551111
+    phoneNumber : '2225551111'
   };
 
   let token;
@@ -223,17 +223,6 @@ describe('Employee - /api/employee', () => {
         });
     });
 
-    it('should respond with 422 if phone number is NOT typeof number', () => {
-      return chai.request(app)
-        .put(`/api/employee/${employee.id}`)
-        .send({'phoneNumber': '123'})
-        .set('Authorization', `Bearer ${token}`)
-        .catch(res => {
-          expect(res).to.have.status(422);
-          expect(res.response.body.message).to.equal(`Field: 'phoneNumber' must be typeof Number`);
-        });
-    });
-
     it('should respond with 422 if email is NOT trimmed', () => {
       return chai.request(app)
         .put(`/api/employee/${employee.id}`)
@@ -252,7 +241,7 @@ describe('Employee - /api/employee', () => {
         img: 'image.png',
         email: 'fake@email.com',
         password: 'password123',
-        phoneNumber: 2225551111,
+        phoneNumber: '2225551111',
 				adminId: admin.id
       };
     	return Employee.create(anotherEmployee)
@@ -279,7 +268,7 @@ describe('Employee - /api/employee', () => {
         img: 'image.png',
         email: 'test@email.com',
         password: 'password123',
-        phoneNumber: 2225551111
+        phoneNumber: '2225551111'
       };
       let res;
       return chai.request(app)
@@ -312,7 +301,7 @@ describe('Employee - /api/employee', () => {
         lastname: 'Lastname',
         img: 'image.png',
         password: 'password123',
-        phoneNumber: 2225551111
+        phoneNumber: '2225551111'
       };
       return chai.request(app)
         .post(`/api/employee`)
@@ -331,7 +320,7 @@ describe('Employee - /api/employee', () => {
         img: 'image.png',
         email: 123,
         password: 'password123',
-        phoneNumber: 2225551111
+        phoneNumber: '2225551111'
       };
       return chai.request(app)
         .post(`/api/employee`)
@@ -343,25 +332,6 @@ describe('Employee - /api/employee', () => {
         });
     });
 
-    it('should respond with 422 if phone number is NOT typeof number', () => {
-      const anotherEmployee = {
-        firstname: 'Firstname',
-        lastname: 'Lastname',
-        img: 'image.png',
-        email: 'test@email.com',
-        password: 'password123',
-        phoneNumber: '2225551111'
-      };
-      return chai.request(app)
-        .post(`/api/employee`)
-        .send(anotherEmployee)
-        .set('Authorization', `Bearer ${token}`)
-        .catch(res => {
-          expect(res).to.have.status(422);
-          expect(res.response.body.message).to.equal(`Field: 'phoneNumber' must be typeof Number`);
-        });
-    });
-
     it('should respond with 422 if email is NOT trimmed', () => {
       const anotherEmployee = {
         firstname: 'Firstname',
@@ -369,7 +339,7 @@ describe('Employee - /api/employee', () => {
         img: 'image.png',
         email: 'test@email.com ',
         password: 'password123',
-        phoneNumber: 2225551111
+        phoneNumber: '2225551111'
       };
       return chai.request(app)
         .post(`/api/employee`)
@@ -388,7 +358,7 @@ describe('Employee - /api/employee', () => {
         img: 'image.png',
         email: 'test@email.com',
         password: 'pass',
-        phoneNumber: 2225551111
+        phoneNumber: '2225551111'
       };
       return chai.request(app)
         .post(`/api/employee`)
@@ -407,7 +377,7 @@ describe('Employee - /api/employee', () => {
         img: 'image.png',
         email: 'test@email.com',
         password: 'password1233333333333333333333333333333333333333333333333333333333333333333333333333333333333333',
-        phoneNumber: 2225551111
+        phoneNumber: '2225551111'
       };
       return chai.request(app)
         .post(`/api/employee`)
@@ -426,7 +396,7 @@ describe('Employee - /api/employee', () => {
         img: 'image.png',
         email: 'example@test.com',
         password: 'password123',
-        phoneNumber: 2225551111
+        phoneNumber: '2225551111'
       };
 			return chai.request(app)
 				.post(`/api/employee`)

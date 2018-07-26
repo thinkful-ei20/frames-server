@@ -65,7 +65,7 @@ router.put('/:employeeId', (req, res, next) => {
 	});
 
 	// Check that all string fields are strings
-	const stringFields = ['firstname', 'lastname', 'img', 'email', 'password'];
+	const stringFields = ['firstname', 'lastname', 'img', 'email', 'password', 'phoneNumber'];
 
   const nonStringField = stringFields.find(field =>
     field in updatedEmployee && typeof updatedEmployee[field] !== 'string'
@@ -73,18 +73,6 @@ router.put('/:employeeId', (req, res, next) => {
 
   if (nonStringField) {
     const err = new Error(`Field: '${nonStringField}' must be typeof String`);
-    err.status = 422;
-    return next(err);
-  }
-
-  // Check that all number fields are numbers
-  const numFields = ['phoneNumber'];
-  const nonNumField = numFields.find(field =>
-    field in updatedEmployee && typeof updatedEmployee[field] !== 'number'
-  );
-
-  if (nonNumField) {
-    const err = new Error(`Field: '${nonNumField}' must be typeof Number`);
     err.status = 422;
     return next(err);
   }
@@ -156,7 +144,7 @@ router.post('/', (req,res,next) => {
 	}
 
 	// Check that all string fields are strings
-  const stringFields = ['firstname', 'lastname', 'img', 'email', 'password'];
+  const stringFields = ['firstname', 'lastname', 'img', 'email', 'password', 'phoneNumber'];
 
   const nonStringField = stringFields.find(field =>
     field in newEmployee && typeof newEmployee[field] !== 'string'
@@ -164,18 +152,6 @@ router.post('/', (req,res,next) => {
 
   if (nonStringField) {
     const err = new Error(`Field: '${nonStringField}' must be typeof String`);
-    err.status = 422;
-    return next(err);
-  }
-
-  // Check that all number fields are numbers
-  const numFields = ['phoneNumber'];
-  const nonNumField = numFields.find(field =>
-    field in newEmployee && typeof newEmployee[field] !== 'number'
-  );
-
-  if (nonNumField) {
-    const err = new Error(`Field: '${nonNumField}' must be typeof Number`);
     err.status = 422;
     return next(err);
   }

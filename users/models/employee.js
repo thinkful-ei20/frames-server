@@ -10,7 +10,7 @@ const employeeSchema = new mongoose.Schema({
 	email: { type: String, require: true, unique: true },
 	adminId: { type: mongoose.Schema.Types.ObjectId, ref: 'Admin', required: true },
 	password: { type: String, require: true },
-	phoneNumber: { type: Number, require: true }
+	phoneNumber: { type: String, require: true }
 });
 
 employeeSchema.set('toObject', {

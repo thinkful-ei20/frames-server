@@ -36,7 +36,7 @@ router.post('/', (req, res, next) => {
 	}
 
   // Check that fields are trimmed as needed
-  const trimmedFields = ['username', 'email', 'companyName', 'password'];
+  const trimmedFields = ['username', 'email', 'companyName', 'password', 'phoneNumber'];
 	const nonTrimmedField = trimmedFields.find(field => {
 		req.body[field].trim() !== req.body[field];
 	});
@@ -189,7 +189,7 @@ router.put('/:adminId', (req, res, next) => {
 		return next(err);
 	}
 
-	const stringFields = ['username', 'email', 'companyName'];
+	const stringFields = ['username', 'email', 'companyName', 'phoneNumber'];
 	const nonStringField = stringFields.find(field =>
 		field in updatedAdmin && typeof updatedAdmin[field] !== 'string'
 	);
@@ -200,19 +200,7 @@ router.put('/:adminId', (req, res, next) => {
 		return next(err);
 	}
 
-	const numFields = ['phoneNumber'];
-	const nonNumField = numFields.find(field =>
-		field in updatedAdmin && typeof updatedAdmin[field] !== 'number'
-	);
-
-	if (nonNumField) {
-		const err = new Error(`Field: '${nonNumField}' must be typeof Number`);
-		err.status = 422;
-		return next(err);
-	}
-
-
-	const trimmedFields = ['username', 'email', 'companyName'];
+	const trimmedFields = ['username', 'email', 'companyName', 'phoneNumber';
 
 	const nonTrimmedField = trimmedFields.find(field => {
 		if (field in updatedAdmin){
@@ -237,7 +225,6 @@ router.put('/:adminId', (req, res, next) => {
 			return sizedFields[field]['min'] > updatedAdmin[field].length;
 		}
 	});
-
 
 	if (tooSmall) {
 		const min = sizedFields[tooSmall].min;
