@@ -31,8 +31,6 @@ router.get('/', (req, res, next) => {
 
 	const filter = { adminId };
 
-	// result: { $and: [ { $gt: [ "$qty", 100 ] }, { $lt: [ "$qty", 250 ] } ] }
-
 	// Only filter on startDate and endDate if they are provided
 	if(startDate) {
 		filter.startFrame = { $gte: startDate, $lte: endDate };
@@ -47,8 +45,6 @@ router.get('/', (req, res, next) => {
 		.sort({'startFrame': 1})
 		.then(results => {
 			if(results.length) {
-
-
 				res.json(results);
 			} else {
 				next();

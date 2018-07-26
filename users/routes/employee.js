@@ -3,23 +3,19 @@
 const router = require('express').Router();
 const passport = require('passport');
 const Employee = require('../models/employee');
-console.log('HELLLO');
+const mongoose = require('mongoose');
+
 // Protect endpoints using JWT Strategy
 router.use('/', passport.authenticate('jwt', { session: false, failWithError: true }));
 
 // Get all employees
 router.get('/', (req, res, next) => {
-	console.log('UUUUUUUUUUUUUUSER', req.user.id);
 	const adminId = req.user.id;
 
 	Employee.find({adminId})
 		.sort('lastname')
 		.then(result => {
-			if(result.length) {
-				res.json(result);
-			} else {
-				next();
-			}
+			res.json(result);
 		})
 		.catch(next);
 });
@@ -29,21 +25,36 @@ router.get('/:employeeId', (req,res,next) => {
 	const adminId = req.user.id;
 	const {employeeId} = req.params;
 
-	Employee.find({_id : employeeId, adminId})
+  /***** Never trust users - validate input *****/
+  if (!mongoose.Types.ObjectId.isValid(employeeId)) {
+  	const err = new Error(`The employee id ${employeeId} is not valid`);
+    err.status = 400;
+    return next(err);
+  }
+
+	Employee.findOne({_id : employeeId, adminId})
 		.then(result => {
-			if(result.length){
+			if(result){
 				return res.json(result);
 			}
 			next();
 		})
-		.catch(error => next(error));
+		.catch(next);
 });
 
 // Update an existing employee
 router.put('/:employeeId', (req, res, next) => {
-	const updatedEmployee = {
+  const {employeeId} = req.params;
+  const updatedEmployee = {
 		adminId : req.user.id
 	};
+
+  /***** Never trust users - validate input *****/
+  if (!mongoose.Types.ObjectId.isValid(employeeId)) {
+    const err = new Error(`The employee id ${employeeId} is not valid`);
+    err.status = 400;
+    return next(err);
+  }
 
 	// Only add fields that can be updated to updatedEmployee object
 	const employeeFields = ['firstname', 'lastname', 'img', 'email', 'phoneNumber', 'password'];
@@ -55,23 +66,43 @@ router.put('/:employeeId', (req, res, next) => {
 
 	// Check that all string fields are strings
 	const stringFields = ['firstname', 'lastname', 'img', 'email', 'password'];
-	stringFields.map(field => {
-		if (updatedEmployee[field] && (typeof updatedEmployee[field] !== 'string')){
-			const err = new Error(`${field} in request body must be a string`);
-			err.status = 422;
-			return next(err);
-		}
-	});
+
+  const nonStringField = stringFields.find(field =>
+    field in updatedEmployee && typeof updatedEmployee[field] !== 'string'
+  );
+
+  if (nonStringField) {
+    const err = new Error(`Field: '${nonStringField}' must be typeof String`);
+    err.status = 422;
+    return next(err);
+  }
+
+  // Check that all number fields are numbers
+  const numFields = ['phoneNumber'];
+  const nonNumField = numFields.find(field =>
+    field in updatedEmployee && typeof updatedEmployee[field] !== 'number'
+  );
+
+  if (nonNumField) {
+    const err = new Error(`Field: '${nonNumField}' must be typeof Number`);
+    err.status = 422;
+    return next(err);
+  }
 
 	// Check that fields are trimmed as needed
-	const trimmedFields = ['password', 'email'];
-	trimmedFields.map(field => {
-		if(updatedEmployee[field] && updatedEmployee[field].trim() !== updatedEmployee[field]){
-			const err = new Error(`${field} must not have any leading or traliing spaces`);
-			err.status = 422;
-			return next(err);
-		}
-	});
+  const trimmedFields = ['password', 'email'];
+
+  const nonTrimmedField = trimmedFields.find(field => {
+    if (field in updatedEmployee){
+      return updatedEmployee[field].trim() !== updatedEmployee[field];
+    }
+  });
+
+  if (nonTrimmedField) {
+    const err = new Error(`Field: '${nonTrimmedField}' cannot start or end with a whitespace!`);
+    err.status = 422;
+    return next(err);
+  }
 
 	// Check that password is long enough
 	if (updatedEmployee.password && updatedEmployee.password < 8){
@@ -81,7 +112,7 @@ router.put('/:employeeId', (req, res, next) => {
 	}
 
 	Employee.findOneAndUpdate(
-		{_id : req.params.employeeId, adminId : req.user.id},
+		{_id : employeeId, adminId : req.user.id},
 		updatedEmployee,
 		{new : true})
 		.then(result => {
@@ -90,9 +121,14 @@ router.put('/:employeeId', (req, res, next) => {
 			}
 			return next();
 		})
-		.catch(error => next(error));
+    .catch(err => {
+      if (err.code === 11000) {
+        err = new Error('Email already exists');
+        err.status = 400;
+      }
+      next(err);
+    });
 });
-
 
 // Create a new employee
 router.post('/', (req,res,next) => {
@@ -108,46 +144,66 @@ router.post('/', (req,res,next) => {
 		}
 	});
 
-	// Check that all required fields are present
-	const requiredFields = ['email', 'phoneNumber', 'password'];
-	requiredFields.map(field => {
-		if (!(field in req.body)){
-			const err = new Error(`Missing ${field} in request body`);
-			err.status = 422;
-			return next(err);
-		}
-	});
+  // Check that all required fields are present
+	const requiredFields = ['email', 'password', 'phoneNumber'];
+
+	const missingField = requiredFields.find(field => !(field in req.body));
+
+	if(missingField) {
+		const err = new Error(`Missing ${missingField} in request body`);
+		err.status = 422;
+		return next(err);
+	}
 
 	// Check that all string fields are strings
-	const stringFields = ['firstname', 'lastname', 'img', 'email', 'password'];
-	stringFields.map(field => {
-		if (typeof newEmployee[field] !== 'string'){
-			const err = new Error(`${field} in request body must be a string`);
-			err.status = 422;
-			return next(err);
-		}
-	});
+  const stringFields = ['firstname', 'lastname', 'img', 'email', 'password'];
 
-	// Check that fields are trimmed as needed
-	const trimmedFields = ['password', 'email'];
-	trimmedFields.map(field => {
-		if(newEmployee[field].trim() !== newEmployee[field]){
-			const err = new Error(`${field} must not have any leading or traliing spaces`);
-			err.status = 422;
-			return next(err);
-		}
-	});
+  const nonStringField = stringFields.find(field =>
+    field in newEmployee && typeof newEmployee[field] !== 'string'
+  );
+
+  if (nonStringField) {
+    const err = new Error(`Field: '${nonStringField}' must be typeof String`);
+    err.status = 422;
+    return next(err);
+  }
+
+  // Check that all number fields are numbers
+  const numFields = ['phoneNumber'];
+  const nonNumField = numFields.find(field =>
+    field in newEmployee && typeof newEmployee[field] !== 'number'
+  );
+
+  if (nonNumField) {
+    const err = new Error(`Field: '${nonNumField}' must be typeof Number`);
+    err.status = 422;
+    return next(err);
+  }
+
+  // Check that fields are trimmed as needed
+  const trimmedFields = ['password', 'email'];
+
+  const nonTrimmedField = trimmedFields.find(field => {
+    if (field in newEmployee){
+      return newEmployee[field].trim() !== newEmployee[field];
+    }
+  });
+
+  if (nonTrimmedField) {
+    const err = new Error(`Field: '${nonTrimmedField}' cannot start or end with a whitespace!`);
+    err.status = 422;
+    return next(err);
+  }
 
 	// Check that fields are as long/short as they need to be
 	const sizedFields = {
 		password: { min: 8, max: 72 }
 	};
 
-	const tooSmall = Object.keys(sizedFields).find(field => {
-		'min' in sizedFields[field]
-    &&
-    req.body[field].trim().length < sizedFields[field].min;
-	});
+  const tooSmall = Object.keys(sizedFields).find(field =>
+    'min' in sizedFields[field] && req.body[field].length < sizedFields[field].min
+  );
+
 	if (tooSmall) {
 		const min = sizedFields[tooSmall].min;
 		const err = new Error(`Field: '${tooSmall}' must be at least ${min} characters long`);
@@ -155,14 +211,13 @@ router.post('/', (req,res,next) => {
 		return next(err);
 	}
 
-	const tooLarge = Object.keys(sizedFields).find(field => {
-		'max' in sizedFields[field]
-    &&
-    req.body[field].trim().length > sizedFields[field].max;
-	});
+	const tooLarge = Object.keys(sizedFields).find(field =>
+		'max' in sizedFields[field] && req.body[field].length > sizedFields[field].max
+	);
+
 	if (tooLarge) {
 		const max = sizedFields[tooLarge].max;
-		const err = new Error(`Field: '${tooLarge}' must be at most ${max} characters long `);
+		const err = new Error(`Field: '${tooLarge}' must be at most ${max} characters long`);
 		err.status = 422;
 		return next(err);
 	}
@@ -170,12 +225,17 @@ router.post('/', (req,res,next) => {
 	// Make request to backend
 	Employee.create(newEmployee)
 		.then(result => {
-			if(result){
-				return res.json(result);
-			}
-			return next();
+      return res.status(201)
+        .location(`/api/admin/${result.id}`)
+        .json(result);
 		})
-		.catch(error => next(error));
+    .catch(err => {
+      if (err.code === 11000) {
+        err = new Error('Email already exists');
+        err.status = 400;
+      }
+      next(err);
+    });
 
 });
 
@@ -187,6 +247,5 @@ router.delete('/:employeeId', (req,res,next) => {
 		})
 		.catch(error => next(error));
 });
-
 
 module.exports = router;
