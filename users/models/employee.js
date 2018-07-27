@@ -1,4 +1,5 @@
 
+//Hash employee passwords
 
 const bcrypt = require('bcryptjs');
 const mongoose = require('mongoose');
