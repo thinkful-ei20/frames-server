@@ -177,7 +177,7 @@ router.get('/:adminId', (req, res, next) => {
 router.put('/:adminId', (req, res, next) => {
 
 	const { adminId } = req.params;
-	let updatedAdmin = {};
+	const updatedAdmin = {};
 	Object.keys(req.body).forEach(key => {
 		updatedAdmin[key] = req.body[key];
 	});
@@ -252,14 +252,12 @@ router.put('/:adminId', (req, res, next) => {
 
 	return Admin.hashPassword(updatedAdmin.password)
 		.then(digest => {
-			updatedAdmin = {
-				username: updatedAdmin.username,
-				email: updatedAdmin.email,
-				companyName: updatedAdmin.companyName,
-				phoneNumber: updatedAdmin.phoneNumber,
+			const admin = {
+				...updatedAdmin,
 				password: digest
 			};
-			Admin.findByIdAndUpdate(adminId, updatedAdmin, { new:true });
+			console.log('hellO!');
+			return Admin.findByIdAndUpdate(adminId, admin, { new:true });
 		})
 		.then(admin => {
 			if (admin) {
