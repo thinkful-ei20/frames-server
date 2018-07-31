@@ -167,16 +167,19 @@ router.post('/frame', (req, res, next) => {
 					const frameStart = new Date(frame.startFrame);
 					const frameEnd = new Date(frame.endFrame);
 					if(start >= frameStart && end <= frameEnd) { // If frame is inside a frame
-						errorMessage = 'This frame is inside an existing frame.'
+						errorMessage = 'This frame is inside an existing frame.';
 						return true;
-
 					}
 					if(end > frameStart && end < frameEnd) { // If end date is inside a frame
 						errorMessage = 'This frame\'s ending is inside another frame.';
 						return true;
 					}
-					if(start < frameEnd && start > frameStart) { // If start date is inside a frame
+					if(start < frameEnd && start >= frameStart) { // If start date is inside a frame
 						errorMessage = 'This frame\'s start is inside another frame.';
+						return true;
+					}
+					if(start < frameStart && end > frameEnd) {
+						errorMessage = 'There is a conflict with the selected time frame.';
 						return true;
 					}
 					return false;
@@ -234,11 +237,61 @@ router.put('/frame/:id', (req, res, next) => {
 		}
 	}
 
-	Frame.findOneAndUpdate({ _id: frameId, adminId }, updatedShift, {new: true})
-		.then(result => {
-			res.json(result);
-		})
-		.catch(next);
+  /**
+   *	startFrame : 2018-07-25 18:00:00.000
+   *	endFrame : 2018-07-25 19:00:00.000
+   */
+  // If frame has an employeeId, check that employee isn't already assigned to another shift
+  // within the same frame
+
+  if(updatedShift.employeeId) {
+    Frame.find({employeeId: updatedShift.employeeId})
+      .then( results => {
+        let errorMessage;
+        const valid = results.filter(frame => {
+        	const start = new Date(updatedShift.startFrame);
+        	const end = new Date(updatedShift.endFrame);
+          const frameStart = new Date(frame.startFrame);
+          const frameEnd = new Date(frame.endFrame);
+          if(start >= frameStart && end <= frameEnd) { // If frame is inside a frame
+            errorMessage = 'This frame is inside an existing frame.';
+            return true;
+          }
+          if(end > frameStart && end < frameEnd) { // If end date is inside a frame
+            errorMessage = 'This frame\'s ending is inside another frame.';
+            return true;
+          }
+          if(start < frameEnd && start >= frameStart) { // If start date is inside a frame
+            errorMessage = 'This frame\'s start is inside another frame.';
+            return true;
+          }
+          if(start < frameStart && end > frameEnd) {
+            errorMessage = 'There is a conflict with the selected time frame.';
+            return true;
+          }
+          return false;
+        });
+
+        if(valid.length) {
+          const err = new Error(errorMessage);
+          err.status = 422;
+          return next(err);
+        }
+
+        return Frame.findOneAndUpdate({ _id: frameId, adminId }, updatedShift, {new: true});
+      })
+      .then(result => {
+        res.location(`${req.originalUrl}/${result.id}`).status(201).json(result);
+      })
+      .catch(next);
+  } else {
+    // else all checks out update the frame!
+    Frame.findOneAndUpdate({ _id: frameId, adminId }, updatedShift, {new: true})
+      .then(result => {
+        res.json(result);
+      })
+      .catch(next);
+  }
 });
 
 // Delete a single frame
