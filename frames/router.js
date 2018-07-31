@@ -152,11 +152,49 @@ router.post('/frame', (req, res, next) => {
 		return next(err);
 	}
 
-	Frame.create(frame)
-		.then(result => {
-			res.location(`${req.originalUrl}/${result.id}`).status(201).json(result);
-		})
-		.catch(next);
+	/**
+	 *	startFrame : 2018-07-25 18:00:00.000
+	 *	endFrame : 2018-07-25 19:00:00.000
+	 */
+	// If frame has an employeeId, check that employee isn't already assigned to another shift
+	// within the same frame
+
+	if(employeeId) {
+		Frame.find({employeeId})
+			.then( results => {
+				const valid = results.filter(frame => {
+					if(start > Date(frame.startFrame) && end < Date(frame.endFrame)) { // If frame is inside a frame
+						return true;
+					}
+					if(end > Date(frame.startFrame) && end < Date(frame.endFrame)) { // If end date is inside a frame
+						return true;
+					}
+					if(start <= Date(frame.endFrame) && start > Date(frame.startFrame)) { // If start date is inside a frame
+						return true;
+					}
+					return false;
+				});
+
+				if(valid.length) {
+					const err = new Error('Frames are overlapping!');
+					err.status = 422;
+					return next(err);
+				}
+
+				return Frame.create(frame);
+			})
+			.then(result => {
+				res.location(`${req.originalUrl}/${result.id}`).status(201).json(result);
+			})
+			.catch(next);
+	} else {
+		// else all checks out create the frame!
+		Frame.create(frame)
+			.then(result => {
+				res.location(`${req.originalUrl}/${result.id}`).status(201).json(result);
+			})
+			.catch(next);
+	}
 });
 
 // Update a single frame
