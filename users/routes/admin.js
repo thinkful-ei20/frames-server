@@ -189,7 +189,7 @@ router.put('/:adminId', (req, res, next) => {
 		return next(err);
 	}
 
-	const stringFields = ['username', 'email', 'companyName', 'phoneNumber'];
+	const stringFields = ['username', 'email', 'companyName', 'phoneNumber', 'password'];
 	const nonStringField = stringFields.find(field =>
 		field in updatedAdmin && typeof updatedAdmin[field] !== 'string'
 	);
@@ -200,7 +200,7 @@ router.put('/:adminId', (req, res, next) => {
 		return next(err);
 	}
 
-	const trimmedFields = ['username', 'email', 'companyName', 'phoneNumber'];
+	const trimmedFields = ['username', 'email', 'companyName', 'phoneNumber', 'password'];
 
 	const nonTrimmedField = trimmedFields.find(field => {
 		if (field in updatedAdmin){
@@ -218,6 +218,7 @@ router.put('/:adminId', (req, res, next) => {
 		username: { min: 1 },
 		email: { min: 1 },
 		companyName: { min: 1 },
+		password: { min: 8, max: 72 }
 	};
 
 	const tooSmall = Object.keys(sizedFields).find(field => {
@@ -233,27 +234,31 @@ router.put('/:adminId', (req, res, next) => {
 		return next(err);
 	}
 
-	/** TODO:
-	 *
-	 * Implement input size cap
-	 */
+	const tooLarge = Object.keys(sizedFields).find(field => {
+		'max' in sizedFields[field]
+    &&
+    req.body[field].trim().length > sizedFields[field].max;
+	});
 
-	// const tooLarge = Object.keys(sizedFields).find(field => {
-	// 	'max' in sizedFields[field]
-	// &&
-	// req.body[field].trim().length > sizedFields[field].max;
-	// });
-	// if (tooLarge) {
-	// 	const max = sizedFields[tooLarge].max;
-	// 	const err = new Error(`Field: '${tooLarge}' must be at most ${max} characters long `);
-	// 	err.status = 422;
-	// 	console.error(err);
-	// 	return next(err);
-	// }
+	if (tooLarge) {
+		const max = sizedFields[tooLarge].max;
+		const err = new Error(`Field: '${tooLarge}' must be at most ${max} characters long `);
+		err.status = 422;
+		console.error(err);
+		return next(err);
+	}
 
 	/* Valid input check END */
 
-	return Admin.findByIdAndUpdate(adminId, updatedAdmin, { new:true })
+	return Admin.hashPassword(updatedAdmin.password)
+		.then(digest => {
+			const admin = {
+				...updatedAdmin,
+				password: digest
+			};
+			console.log('hellO!');
+			return Admin.findByIdAndUpdate(adminId, admin, { new:true });
+		})
 		.then(admin => {
 			if (admin) {
 				res.json(admin);
