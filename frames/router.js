@@ -162,21 +162,28 @@ router.post('/frame', (req, res, next) => {
 	if(employeeId) {
 		Frame.find({employeeId})
 			.then( results => {
+				let errorMessage;
 				const valid = results.filter(frame => {
-					if(start > Date(frame.startFrame) && end < Date(frame.endFrame)) { // If frame is inside a frame
+					const frameStart = new Date(frame.startFrame);
+					const frameEnd = new Date(frame.endFrame);
+					if(start >= frameStart && end <= frameEnd) { // If frame is inside a frame
+						errorMessage = 'This frame is inside an existing frame.'
+						return true;
+
+					}
+					if(end > frameStart && end < frameEnd) { // If end date is inside a frame
+						errorMessage = 'This frame\'s ending is inside another frame.';
 						return true;
 					}
-					if(end > Date(frame.startFrame) && end < Date(frame.endFrame)) { // If end date is inside a frame
-						return true;
-					}
-					if(start <= Date(frame.endFrame) && start > Date(frame.startFrame)) { // If start date is inside a frame
+					if(start < frameEnd && start > frameStart) { // If start date is inside a frame
+						errorMessage = 'This frame\'s start is inside another frame.';
 						return true;
 					}
 					return false;
 				});
 
 				if(valid.length) {
-					const err = new Error('Frames are overlapping!');
+					const err = new Error(errorMessage);
 					err.status = 422;
 					return next(err);
 				}
