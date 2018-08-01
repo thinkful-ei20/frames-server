@@ -57,7 +57,7 @@ router.put('/:employeeId', (req, res, next) => {
 	}
 
 	// Only add fields that can be updated to updatedEmployee object
-	const employeeFields = ['firstname', 'lastname', 'img', 'email', 'phoneNumber', 'password'];
+	const employeeFields = ['firstname', 'lastname', 'img', 'email', 'phoneNumber', 'password', 'availability'];
 	employeeFields.map(field => {
 		if (field in req.body){
 			updatedEmployee[field] = req.body[field];
@@ -125,7 +125,7 @@ router.post('/', (req,res,next) => {
 	};
 
 	// Only add fields that can be updated to newEmployee object
-	const employeeFields = ['firstname', 'lastname', 'img', 'email', 'phoneNumber', 'password'];
+	const employeeFields = ['firstname', 'lastname', 'img', 'email', 'phoneNumber', 'password', 'availability'];
 	employeeFields.map(field => {
 		if (field in req.body){
 			newEmployee[field] = req.body[field];
