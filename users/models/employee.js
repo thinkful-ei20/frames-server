@@ -5,13 +5,14 @@ const bcrypt = require('bcryptjs');
 const mongoose = require('mongoose');
 
 const employeeSchema = new mongoose.Schema({
-	firstname: { type: String },
-	lastname: { type: String },
+	firstname: { type: String, required : true },
+	lastname: { type: String, required : true },
 	img: { type: String },
 	email: { type: String, require: true, unique: true },
 	adminId: { type: mongoose.Schema.Types.ObjectId, ref: 'Admin', required: true },
 	password: { type: String, require: true },
-	phoneNumber: { type: String, require: true }
+	phoneNumber: { type: String, require: true },
+	availability : {type: Array}
 });
 
 employeeSchema.set('toObject', {

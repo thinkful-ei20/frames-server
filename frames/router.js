@@ -4,6 +4,7 @@ const router = require('express').Router();
 const passport = require('passport');
 const mongoose = require('mongoose');
 const Frame = require('./model');
+const Employee = require('../users/models/employee');
 
 // // Unprotected end point for testing purposes
 // router.get('/test', (req, res, next) => {
@@ -144,23 +145,53 @@ router.post('/frame', (req, res, next) => {
 	//Check that end frame is later than start frame
 	const start = new Date(startFrame);
 	const end = new Date(endFrame);
+
 	if(start > end){
 		const err = new Error('endFrame must be later than startFrame');
 		err.status = 422;
 		return next(err);
 	}
 
-	/**
-	 *	startFrame : 2018-07-25 18:00:00.000
-	 *	endFrame : 2018-07-25 19:00:00.000
-	 */
-	// If frame has an employeeId, check that employee isn't already assigned to another shift
-	// within the same frame
-
 	if(employeeId) {
-		Frame.find({employeeId})
-			.then( results => {
+		Employee.findById(employeeId)
+			.then(employee => {
+				// Availability validation
+				let isAvailable = false;
+				const daysOfWeek = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
+				const startDay = daysOfWeek[new Date(start).getDay()];
+				const endDay = daysOfWeek[new Date(end).getDay()];
+
+				const startHour = new Date(start).getHours();
+				const endHour = new Date(end).getHours();
+
+				employee.availability.filter(weekday => {
+					// check if the weekday is the same as the frame day
+					// check if start time is at or after available time
+					// check that end time is at or before available end
+					console.log(weekday.start, weekday.end);
+					console.log(startHour, endHour);
+
+					if(
+						(weekday.day === startDay || weekday.day === endDay) &&
+						(Number.parseInt(weekday.start, 10) <= startHour) &&
+						(Number.parseInt(weekday.end, 10) >= endHour)
+					){
+						isAvailable = true;
+					}
+				});
+
+				//Throw an error if the employee is not available at the given time
+				if (!isAvailable){
+					const err = new Error('The employee is not available during these times');
+					err.status = 422;
+					return next(err);
+				}
+
+				return Frame.find({ employeeId });
+			})
+			.then(results => {
 				let errorMessage;
+				// Checking for duplicate frames
 				const valid = results.filter(frame => {
 					const frameStart = new Date(frame.startFrame);
 					const frameEnd = new Date(frame.endFrame);
@@ -207,7 +238,7 @@ router.post('/frame', (req, res, next) => {
 
 // Update a single frame
 router.put('/frame/:id', (req, res, next) => {
-	// console.log('START DATE', req.body.startFrame);
+
 	const adminId = req.user.id;
 	const frameId = req.params.id;
 	const updateableFields = ['startFrame', 'endFrame', 'employeeId'];
@@ -235,15 +266,44 @@ router.put('/frame/:id', (req, res, next) => {
 		}
 	}
 
-	/**
-   *	startFrame : 2018-07-25 18:00:00.000
-   *	endFrame : 2018-07-25 19:00:00.000
-   */
-	// If frame has an employeeId, check that employee isn't already assigned to another shift
-	// within the same frame
+
 
 	if(updatedShift.employeeId) {
-		Frame.find({employeeId: updatedShift.employeeId})
+		Employee.findById(updatedShift.employeeId)
+			.then(employee => {
+				// Availability validation
+				let isAvailable = false;
+				const daysOfWeek = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
+				const startDay = daysOfWeek[new Date(updatedShift.startFrame).getDay()];
+				const endDay = daysOfWeek[new Date(updatedShift.endFrame).getDay()];
+
+				const startHour = new Date(updatedShift.startFrame).getHours();
+				const endHour = new Date(updatedShift.endFrame).getHours();
+
+
+				employee.availability.filter(weekday => {
+					// check if the weekday is the same as the frame day
+					// check if start time is at or after available time
+					// check that end time is at or before available end
+					console.log(weekday);
+					if(
+						(weekday.day === startDay || weekday.day === endDay) &&
+						(Number.parseInt(weekday.start, 10) <= startHour) &&
+						(Number.parseInt(weekday.end, 10) >= endHour)
+					){
+						isAvailable = true;
+					}
+				});
+
+				//Throw an error if the employee is not available at the given time
+				if (!isAvailable){
+					const err = new Error('The employee is not available during these times');
+					err.status = 422;
+					return next(err);
+				}
+
+				return Frame.find({employeeId: updatedShift.employeeId});
+			})
 			.then( results => {
 				let errorMessage;
 				const valid = results.filter(frame => {
