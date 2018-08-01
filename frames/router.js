@@ -156,14 +156,35 @@ router.post('/frame', (req, res, next) => {
 		Employee.findById(employeeId)
 			.then(employee => {
 				// Availability validation
-				console.log(`Employee: ${JSON.stringify(employee.availability)}`);
-				console.log(`Employee availability.start: ${employee.availability[0].start}`); //undefined
-				console.log(`Employee availability.end: ${employee.availability[0].end}`); //undefined
-				// is the start frame in the availability 
-			
-				// is the end frame in the availability
+				let isAvailable = false;
+				const daysOfWeek = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
+				const startDay = daysOfWeek[new Date(start).getDay()];
+				const endDay = daysOfWeek[new Date(end).getDay()];
 
-				return Frame.find({ employeeId })
+				const startHour = new Date(start).getHours();
+				const endHour = new Date(end).getHours();
+
+				employee.availability.filter(weekday => {
+					// check if the weekday is the same as the frame day
+					// check if start time is at or after available time
+					// check that end time is at or before available end
+					if(
+						(weekday.day === startDay || weekday.day === endDay) &&
+						(Number.parseInt(weekday.start, 10) >= startHour) &&
+						(Number.parseInt(weekday.end, 10) <= endHour)
+					){
+						isAvailable = true;
+					}
+				});
+
+				//Throw an error if the employee is not available at the given time
+				if (!isAvailable){
+					const err = new Error('The employee is not available during these times');
+					err.status = 422;
+					return next(err);
+				}
+
+				return Frame.find({ employeeId });
 			})
 			.then(results => {
 				let errorMessage;
