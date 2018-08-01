@@ -64,16 +64,16 @@ router.put('/:employeeId', (req, res, next) => {
 		}
 	});
 
-  // Check that all required fields are present
-  const requiredFields = ['email', 'password', 'phoneNumber'];
+	// Check that all required fields are present
+	const requiredFields = ['email', 'password', 'phoneNumber'];
 
-  const missingField = requiredFields.find(field => !(field in req.body));
+	const missingField = requiredFields.find(field => !(field in req.body));
 
-  if(missingField) {
-    const err = new Error(`Missing ${missingField} in request body`);
-    err.status = 422;
-    return next(err);
-  }
+	if(missingField) {
+		const err = new Error(`Missing ${missingField} in request body`);
+		err.status = 422;
+		return next(err);
+	}
 
 	// Check that all string fields are strings
 	const stringFields = ['firstname', 'lastname', 'img', 'email', 'password', 'phoneNumber'];
@@ -103,36 +103,36 @@ router.put('/:employeeId', (req, res, next) => {
 		return next(err);
 	}
 
-  // Check that fields are as long/short as they need to be
-  const sizedFields = {
-    password: { min: 8, max: 72 },
-    phoneNumber: { min: 10, max: 10 },
-    email: { min: 6 }
-  };
+	// Check that fields are as long/short as they need to be
+	const sizedFields = {
+		password: { min: 8, max: 72 },
+		phoneNumber: { min: 10, max: 10 },
+		email: { min: 6 }
+	};
 
-  const tooSmall = Object.keys(sizedFields).find(field =>
-    'min' in sizedFields[field] && req.body[field].length < sizedFields[field].min
-  );
+	const tooSmall = Object.keys(sizedFields).find(field =>
+		'min' in sizedFields[field] && req.body[field].length < sizedFields[field].min
+	);
 
-  if (tooSmall) {
-    const min = sizedFields[tooSmall].min;
-    const err = new Error(`Field: '${tooSmall}' must be at least ${min} characters long`);
-    err.status = 422;
-    return next(err);
-  }
+	if (tooSmall) {
+		const min = sizedFields[tooSmall].min;
+		const err = new Error(`Field: '${tooSmall}' must be at least ${min} characters long`);
+		err.status = 422;
+		return next(err);
+	}
 
-  const tooLarge = Object.keys(sizedFields).find(field =>
-    'max' in sizedFields[field] && req.body[field].length > sizedFields[field].max
-  );
+	const tooLarge = Object.keys(sizedFields).find(field =>
+		'max' in sizedFields[field] && req.body[field].length > sizedFields[field].max
+	);
 
-  if (tooLarge) {
-    const max = sizedFields[tooLarge].max;
-    const err = new Error(`Field: '${tooLarge}' must be at most ${max} characters long`);
-    err.status = 422;
-    return next(err);
-  }
+	if (tooLarge) {
+		const max = sizedFields[tooLarge].max;
+		const err = new Error(`Field: '${tooLarge}' must be at most ${max} characters long`);
+		err.status = 422;
+		return next(err);
+	}
 
-  Employee.hashPassword(updatedEmployee.password)
+	Employee.hashPassword(updatedEmployee.password)
 		.then(digest => {
 			const employee = {
 				...updatedEmployee,
@@ -142,21 +142,21 @@ router.put('/:employeeId', (req, res, next) => {
 				{_id: employeeId, adminId: req.user.id},
 				employee,
 				{new: true}
-				)
+			)
 				.then(result => {
-				if(result) {
-					return res.json(result);
-				}
-				return next();
-			})
-				.catch(err => {
-          if (err.code === 11000) {
-            err = new Error('Email already exists');
-            err.status = 400;
-          }
-          next(err);
+					if(result) {
+						return res.json(result);
+					}
+					return next();
 				})
-		})
+				.catch(err => {
+					if (err.code === 11000) {
+						err = new Error('Email already exists');
+						err.status = 400;
+					}
+					next(err);
+				});
+		});
 });
 
 // Create a new employee
@@ -216,7 +216,7 @@ router.post('/', (req,res,next) => {
 	const sizedFields = {
 		password: { min: 8, max: 72 },
 		phoneNumber: { min: 10, max: 10 },
-    email: { min: 6 }
+		email: { min: 6 }
 	};
 
 	const tooSmall = Object.keys(sizedFields).find(field =>

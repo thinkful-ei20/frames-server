@@ -177,10 +177,6 @@ router.get('/:adminId', (req, res, next) => {
 router.put('/:adminId', (req, res, next) => {
 
 	const { adminId } = req.params;
-	const updatedAdmin = {};
-	Object.keys(req.body).forEach(key => {
-		updatedAdmin[key] = req.body[key];
-	});
 
 	/* Valid input check START */
 	if (!mongoose.Types.ObjectId.isValid(adminId)) {
@@ -188,11 +184,10 @@ router.put('/:adminId', (req, res, next) => {
 		err.status = 400;
 		return next(err);
 	}
-
 	const stringFields = ['username', 'email', 'companyName', 'phoneNumber', 'password'];
-	const nonStringField = stringFields.find(field =>
-		field in updatedAdmin && typeof updatedAdmin[field] !== 'string'
-	);
+	const nonStringField = stringFields.find(field => {
+		return field in req.body && typeof req.body[field] !== 'string';
+	});
 
 	if (nonStringField) {
 		const err = new Error(`Field: '${nonStringField}' must be typeof String`);
@@ -203,9 +198,7 @@ router.put('/:adminId', (req, res, next) => {
 	const trimmedFields = ['username', 'email', 'companyName', 'phoneNumber', 'password'];
 
 	const nonTrimmedField = trimmedFields.find(field => {
-		if (field in updatedAdmin){
-			return updatedAdmin[field].trim() !== updatedAdmin[field];
-		}
+		return field in req.body && req.body[field].trim() !== req.body[field];
 	});
 
 	if (nonTrimmedField) {
@@ -218,13 +211,17 @@ router.put('/:adminId', (req, res, next) => {
 		username: { min: 1 },
 		email: { min: 1 },
 		companyName: { min: 1 },
-		password: { min: 8, max: 72 }
+		password: { min: 8, max: 72 },
 	};
 
 	const tooSmall = Object.keys(sizedFields).find(field => {
-		if (field in updatedAdmin){
-			return sizedFields[field]['min'] > updatedAdmin[field].length;
-		}
+		if(req.body[field])
+			return 'min' in sizedFields[field] && req.body[field].trim().length < sizedFields[field].min;
+	});
+
+	const tooLarge = Object.keys(sizedFields).find(field => {
+		if(req.body[field])
+			return 'max' in sizedFields[field] && req.body[field].trim().length > sizedFields[field].max;
 	});
 
 	if (tooSmall) {
@@ -234,26 +231,20 @@ router.put('/:adminId', (req, res, next) => {
 		return next(err);
 	}
 
-	const tooLarge = Object.keys(sizedFields).find(field => {
-		'max' in sizedFields[field]
-    &&
-    req.body[field].trim().length > sizedFields[field].max;
-	});
-
 	if (tooLarge) {
 		const max = sizedFields[tooLarge].max;
 		const err = new Error(`Field: '${tooLarge}' must be at most ${max} characters long `);
 		err.status = 422;
-		console.error(err);
 		return next(err);
 	}
-
 	/* Valid input check END */
 
-	return Admin.hashPassword(updatedAdmin.password)
+	let{password} = req.body;
+
+	return Admin.hashPassword(password)
 		.then(digest => {
 			const admin = {
-				...updatedAdmin,
+				...req.body,
 				password: digest
 			};
 			return Admin.findByIdAndUpdate(adminId, admin, { new:true });
