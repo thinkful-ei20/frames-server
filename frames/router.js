@@ -156,7 +156,13 @@ router.post('/frame', (req, res, next) => {
 		Employee.findById(employeeId)
 			.then(employee => {
 				// Availability validation
-				console.log(`Employee availability: ${employee}`);
+				console.log(`Employee: ${JSON.stringify(employee.availability)}`);
+				console.log(`Employee availability.start: ${employee.availability[0].start}`); //undefined
+				console.log(`Employee availability.end: ${employee.availability[0].end}`); //undefined
+				// is the start frame in the availability 
+			
+				// is the end frame in the availability
+
 				return Frame.find({ employeeId })
 			})
 			.then(results => {
