@@ -132,23 +132,31 @@ router.put('/:employeeId', (req, res, next) => {
     return next(err);
   }
 
-	Employee.findOneAndUpdate(
-		{_id : employeeId, adminId : req.user.id},
-		updatedEmployee,
-		{new : true})
-		.then(result => {
-			if (result){
-				return res.json(result);
-			}
-			return next();
+  Employee.hashPassword(updatedEmployee.password)
+		.then(digest => {
+			const employee = {
+				...updatedEmployee,
+				password: digest
+			};
+			return Employee.findOneAndUpdate(
+				{_id: employeeId, adminId: req.user.id},
+				employee,
+				{new: true}
+				)
+				.then(result => {
+				if(result) {
+					return res.json(result);
+				}
+				return next();
+			})
+				.catch(err => {
+          if (err.code === 11000) {
+            err = new Error('Email already exists');
+            err.status = 400;
+          }
+          next(err);
+				})
 		})
-		.catch(err => {
-			if (err.code === 11000) {
-				err = new Error('Email already exists');
-				err.status = 400;
-			}
-			next(err);
-		});
 });
 
 // Create a new employee
