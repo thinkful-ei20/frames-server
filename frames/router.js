@@ -4,6 +4,7 @@ const router = require('express').Router();
 const passport = require('passport');
 const mongoose = require('mongoose');
 const Frame = require('./model');
+const Employee = require('../users/models/employee');
 
 // // Unprotected end point for testing purposes
 // router.get('/test', (req, res, next) => {
@@ -144,23 +145,29 @@ router.post('/frame', (req, res, next) => {
 	//Check that end frame is later than start frame
 	const start = new Date(startFrame);
 	const end = new Date(endFrame);
+
 	if(start > end){
 		const err = new Error('endFrame must be later than startFrame');
 		err.status = 422;
 		return next(err);
 	}
 
-	/**
-	 *	startFrame : 2018-07-25 18:00:00.000
-	 *	endFrame : 2018-07-25 19:00:00.000
-	 */
-	// If frame has an employeeId, check that employee isn't already assigned to another shift
-	// within the same frame
-
 	if(employeeId) {
-		Frame.find({employeeId})
-			.then( results => {
+		Employee.findById(employeeId)
+			.then(employee => {
+				// Availability validation
+				console.log(`Employee: ${JSON.stringify(employee.availability)}`);
+				console.log(`Employee availability.start: ${employee.availability[0].start}`); //undefined
+				console.log(`Employee availability.end: ${employee.availability[0].end}`); //undefined
+				// is the start frame in the availability 
+			
+				// is the end frame in the availability
+
+				return Frame.find({ employeeId })
+			})
+			.then(results => {
 				let errorMessage;
+				// Checking for duplicate frames
 				const valid = results.filter(frame => {
 					const frameStart = new Date(frame.startFrame);
 					const frameEnd = new Date(frame.endFrame);
