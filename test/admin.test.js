@@ -187,7 +187,7 @@ describe('ADMIN - /api/admin', () => {
 				.then(Admin => {
 					expect(Admin).to.exist;
 					expect(Admin.id).to.equal(res.body.id);
-					return Admin.validatePassword(password);
+					return Admin.validatePassword('password10');
 				})
 				.then(isValid => {
 					expect(isValid).to.be.true;
