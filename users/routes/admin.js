@@ -112,35 +112,35 @@ router.post('/', (req, res, next) => {
 });
 
 /* =================================================================================== */
-// GET ALL ADMINS
-router.get('/', (req, res, next) => {
-	Admin.find()
-		.then(admin => {
-			res.json(admin);
-		})
-		.catch(err => {
-			console.error(err);
-			next(err);
-		});
-});
+// GET ALL ADMINS - commented out in production
+// router.get('/', (req, res, next) => {
+// 	Admin.find()
+// 		.then(admin => {
+// 			res.json(admin);
+// 		})
+// 		.catch(err => {
+// 			console.error(err);
+// 			next(err);
+// 		});
+// });
 
 /* =================================================================================== */
-// DELETE A USER BY ID
+// DELETE A USER BY ID - commented out in production
 // Needs to delete all things associated with it (employees, frames)
-router.delete('/:adminId', (req, res, next) => {
-	const { adminId } = req.params;
+// router.delete('/:adminId', (req, res, next) => {
+// 	const { adminId } = req.params;
 
-	Admin.findOneAndRemove({ _id: adminId })
-		.then(() => {
-			return res.status(204).json({
-				message: 'Deleted Admin user'
-			});
-		})
-		.catch(err => {
-			console.error(err);
-			next(err);
-		});
-});
+// 	Admin.findOneAndRemove({ _id: adminId })
+// 		.then(() => {
+// 			return res.status(204).json({
+// 				message: 'Deleted Admin user'
+// 			});
+// 		})
+// 		.catch(err => {
+// 			console.error(err);
+// 			next(err);
+// 		});
+// });
 
 
 /* =================================================================================== */
@@ -256,7 +256,6 @@ router.put('/:adminId', (req, res, next) => {
 				...updatedAdmin,
 				password: digest
 			};
-			console.log('hellO!');
 			return Admin.findByIdAndUpdate(adminId, admin, { new:true });
 		})
 		.then(admin => {
