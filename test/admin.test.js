@@ -19,45 +19,13 @@ chai.use(chaiExclude);
 describe.only('ADMIN - /api/admin', () => {
 
 	const username = 'exampleuser123';
-	const email = 'example123@test.com';
+	const email = 'exampleuser123@test.com';
 	const companyName = 'merntalists';
 	const password = 'password123';
 	const phoneNumber = '2225551111';
 
 	let token;
 	let user;
-
-	before(() => {
-		return mongoose.connect(TEST_DATABASE_URL)
-			.then(() => mongoose.connection.db.dropDatabase());
-	});
-	beforeEach(() => {
-		return Admin.create({
-			username,
-			email,
-			companyName,
-			password,
-			phoneNumber,
-		})
-			.then((currUser) => {
-				user = currUser;
-
-				token = jwt.sign(
-					{user},
-					JWT_SECRET,
-					{subject : user.username});
-			})
-			.then(() => {
-				return Admin.createIndexes();
-			});
-	});
-	afterEach(() => {
-		return mongoose.connection.db.dropDatabase();
-	});
-	after(() => {
-		return mongoose.disconnect();
-	});
-
 
 	// describe('GET ALL /api/admin', () => {
 	// 	it('should return an array of all admins', () => {
@@ -85,6 +53,37 @@ describe.only('ADMIN - /api/admin', () => {
 	// });
 
 	describe('GET ONE /api/admin/:adminId', () => {
+		before(() => {
+			return mongoose.connect(TEST_DATABASE_URL)
+				.then(() => mongoose.connection.db.dropDatabase());
+		});
+		beforeEach(() => {
+			return Admin.create({
+				username,
+				email,
+				companyName,
+				password,
+				phoneNumber,
+			})
+				.then((currUser) => {
+					user = currUser;
+
+					token = jwt.sign(
+						{user},
+						JWT_SECRET,
+						{subject : user.username});
+				})
+				.then(() => {
+					return Admin.createIndexes();
+				});
+		});
+		afterEach(() => {
+			return mongoose.connection.db.dropDatabase();
+		});
+		after(() => {
+			return mongoose.disconnect();
+		});
+
 		it('should return the admin, given valid credentials', () => {
 
 			let res;
@@ -130,6 +129,39 @@ describe.only('ADMIN - /api/admin', () => {
 	});
 
 	describe('POST /api/admin', () => {
+
+		before(() => {
+			return mongoose.connect(TEST_DATABASE_URL)
+				.then(() => mongoose.connection.db.dropDatabase());
+		});
+		beforeEach(() => {
+			return Admin.create({
+				username,
+				email,
+				companyName,
+				password,
+				phoneNumber,
+			})
+				.then((currUser) => {
+					user = currUser;
+
+					token = jwt.sign(
+						{user},
+						JWT_SECRET,
+						{subject : user.username});
+				})
+				.then(() => {
+					return Admin.createIndexes();
+				});
+		});
+		afterEach(() => {
+			return mongoose.connection.db.dropDatabase();
+		});
+		after(() => {
+			return mongoose.disconnect();
+		});
+
+
 		it('Should create a new admin user', () => {
 			let res;
 			return chai
@@ -137,6 +169,7 @@ describe.only('ADMIN - /api/admin', () => {
 				.post('/api/admin')
 				.send({ username, email, companyName, password, phoneNumber })
 				.then(_res => {
+					console.log('not duped!');
 					res = _res;
 					expect(res).to.have.status(201);
 					expect(res.body).to.be.an('object');
@@ -160,6 +193,38 @@ describe.only('ADMIN - /api/admin', () => {
 	});
 
 	describe('PUT /api/admin/:adminId', () => {
+
+		before(() => {
+			return mongoose.connect(TEST_DATABASE_URL)
+				.then(() => mongoose.connection.db.dropDatabase());
+		});
+		beforeEach(() => {
+			return Admin.create({
+				username,
+				email,
+				companyName,
+				password,
+				phoneNumber,
+			})
+				.then((currUser) => {
+					user = currUser;
+
+					token = jwt.sign(
+						{user},
+						JWT_SECRET,
+						{subject : user.username});
+				})
+				.then(() => {
+					return Admin.createIndexes();
+				});
+		});
+		afterEach(() => {
+			return mongoose.connection.db.dropDatabase();
+		});
+		after(() => {
+			return mongoose.disconnect();
+		});
+
 		it('should update the admin given correct credentials', () => {
 			let res;
 			return chai.request(app)
@@ -239,8 +304,37 @@ describe.only('ADMIN - /api/admin', () => {
 	});
 
 	describe('DELETE /api/admin/:adminId', () => {
-		it('should delete the user', () => {
+		before(() => {
+			return mongoose.connect(TEST_DATABASE_URL)
+				.then(() => mongoose.connection.db.dropDatabase());
+		});
+		beforeEach(() => {
+			return Admin.create({
+				username,
+				email,
+				companyName,
+				password,
+				phoneNumber,
+			})
+				.then((currUser) => {
+					user = currUser;
+					token = jwt.sign(
+						{user},
+						JWT_SECRET,
+						{subject : user.username});
+				})
+				.then(() => {
+					return Admin.createIndexes();
+				});
+		});
+		afterEach(() => {
+			return mongoose.connection.db.dropDatabase();
+		});
+		after(() => {
+			return mongoose.disconnect();
+		});
 
+		it('should delete the user', () => {
 			return chai.request(app)
 				.delete(`/api/admin/${user.id}`)
 				.then(res => {
@@ -250,8 +344,5 @@ describe.only('ADMIN - /api/admin', () => {
 				})
 				.then(data => expect(data).to.be.null);
 		});
-
 	});
-
-
 });

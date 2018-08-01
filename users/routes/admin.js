@@ -18,7 +18,6 @@ router.post('/', (req, res, next) => {
 	if (missingField) {
 		const err = new Error(`Missing ${missingField} in request body`);
 		err.status = 422;
-		console.error(err);
 		return next(err);
 	}
 
@@ -31,7 +30,6 @@ router.post('/', (req, res, next) => {
 	if (nonStringField) {
 		const err = new Error(`Field: '${nonStringField}' must be typeof String`);
 		err.status = 422;
-		console.error(err);
 		return next(err);
 	}
 
@@ -44,7 +42,6 @@ router.post('/', (req, res, next) => {
 	if (nonTrimmedField) {
 		const err = new Error(`Field: '${nonTrimmedField}' cannot start or end with a whitespace!`);
 		err.status = 422;
-		console.error(err);
 		return next(err);
 	}
 
@@ -52,37 +49,37 @@ router.post('/', (req, res, next) => {
 		username: { min: 1 },
 		email: { min: 1 },
 		companyName: { min: 1 },
-		password: { min: 8, max: 72 }
+		password: { min: 8, max: 72 },
 	};
 
 	const tooSmall = Object.keys(sizedFields).find(field => {
-		'min' in sizedFields[field]
-    &&
-    req.body[field].trim().length < sizedFields[field].min;
+		if(req.body[field])
+			return 'min' in sizedFields[field] && req.body[field].trim().length < sizedFields[field].min;
 	});
+
+	const tooLarge = Object.keys(sizedFields).find(field => {
+		if(req.body[field])
+			return 'max' in sizedFields[field] && req.body[field].trim().length > sizedFields[field].max;
+	});
+
 	if (tooSmall) {
 		const min = sizedFields[tooSmall].min;
 		const err = new Error(`Field: '${tooSmall}' must be at least ${min} characters long`);
 		err.status = 422;
-		console.error(err);
 		return next(err);
 	}
 
-	const tooLarge = Object.keys(sizedFields).find(field => {
-		'max' in sizedFields[field]
-    &&
-    req.body[field].trim().length > sizedFields[field].max;
-	});
 	if (tooLarge) {
 		const max = sizedFields[tooLarge].max;
 		const err = new Error(`Field: '${tooLarge}' must be at most ${max} characters long `);
 		err.status = 422;
-		console.error(err);
 		return next(err);
 	}
 
 	// Create the new admin user
 	let { username, email, companyName, password, phoneNumber } = req.body;
+
+	console.log('email!', email);
 
 	return Admin.hashPassword(password)
 		.then(digest => {
@@ -101,12 +98,10 @@ router.post('/', (req, res, next) => {
 				.json(result);
 		})
 		.catch(err => {
-			console.log(err);
 			if (err.code === 11000) {
 				err = new Error('The email already exists');
 				err.status = 400;
 			}
-			console.error(err);
 			next(err);
 		});
 });
