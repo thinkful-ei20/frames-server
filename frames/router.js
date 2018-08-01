@@ -235,7 +235,7 @@ router.post('/frame', (req, res, next) => {
 
 // Update a single frame
 router.put('/frame/:id', (req, res, next) => {
-	// console.log('START DATE', req.body.startFrame);
+
 	const adminId = req.user.id;
 	const frameId = req.params.id;
 	const updateableFields = ['startFrame', 'endFrame', 'employeeId'];
@@ -263,15 +263,42 @@ router.put('/frame/:id', (req, res, next) => {
 		}
 	}
 
-	/**
-   *	startFrame : 2018-07-25 18:00:00.000
-   *	endFrame : 2018-07-25 19:00:00.000
-   */
-	// If frame has an employeeId, check that employee isn't already assigned to another shift
-	// within the same frame
+
 
 	if(updatedShift.employeeId) {
-		Frame.find({employeeId: updatedShift.employeeId})
+		Employee.findById(updatedShift.employeeId)
+			.then(employee => {
+				// Availability validation
+				let isAvailable = false;
+				const daysOfWeek = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
+				const startDay = daysOfWeek[new Date(updatedShift.startFrame).getDay()];
+				const endDay = daysOfWeek[new Date(updatedShift.endFrame).getDay()];
+
+				const startHour = new Date(updatedShift.startFrame).getHours();
+				const endHour = new Date(updatedShift.endFrame).getHours();
+
+				employee.availability.filter(weekday => {
+					// check if the weekday is the same as the frame day
+					// check if start time is at or after available time
+					// check that end time is at or before available end
+					if(
+						(weekday.day === startDay || weekday.day === endDay) &&
+						(Number.parseInt(weekday.start, 10) >= startHour) &&
+						(Number.parseInt(weekday.end, 10) <= endHour)
+					){
+						isAvailable = true;
+					}
+				});
+
+				//Throw an error if the employee is not available at the given time
+				if (!isAvailable){
+					const err = new Error('The employee is not available during these times');
+					err.status = 422;
+					return next(err);
+				}
+
+				return Frame.find({employeeId: updatedShift.employeeId});
+			})
 			.then( results => {
 				let errorMessage;
 				const valid = results.filter(frame => {
