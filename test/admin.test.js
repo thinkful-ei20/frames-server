@@ -16,7 +16,7 @@ const expect = chai.expect;
 chai.use(chaiHttp);
 chai.use(chaiExclude);
 
-describe.only('ADMIN - /api/admin', () => {
+describe('ADMIN - /api/admin', () => {
 
 	const username = 'exampleuser123';
 	const email = 'exampleuser123@test.com';
@@ -128,7 +128,7 @@ describe.only('ADMIN - /api/admin', () => {
 		});
 	});
 
-	describe('POST /api/admin', () => {
+	describe.only('POST /api/admin', () => {
 
 		before(() => {
 			return mongoose.connect(TEST_DATABASE_URL)
@@ -167,19 +167,22 @@ describe.only('ADMIN - /api/admin', () => {
 			return chai
 				.request(app)
 				.post('/api/admin')
-				.send({ username, email, companyName, password, phoneNumber })
+				.send({ username : 'mycooluser',
+					email : 'auniqueemail@gmail.com',
+					companyName : 'Cool Co Kweens!', 
+					password : 'password10',
+					phoneNumber : '1231231234' })
 				.then(_res => {
-					console.log('not duped!');
 					res = _res;
 					expect(res).to.have.status(201);
 					expect(res.body).to.be.an('object');
 					expect(res.body).to.have.keys('id', 'username', 'email', 'companyName', 'phoneNumber', 'createdAt', 'updatedAt');
 					expect(res.body.id).to.exist;
-					expect(res.body.username).to.equal(username);
-					expect(res.body.email).to.equal(email);
-					expect(res.body.companyName).to.equal(companyName);
-					expect(res.body.phoneNumber).to.equal(phoneNumber);
-					return Admin.findOne({ username });
+					expect(res.body.username).to.equal('mycooluser');
+					expect(res.body.email).to.equal('auniqueemail@gmail.com');
+					expect(res.body.companyName).to.equal('Cool Co Kweens!');
+					expect(res.body.phoneNumber).to.equal('1231231234');
+					return Admin.findOne({ username : 'mycooluser' });
 				})
 				.then(Admin => {
 					expect(Admin).to.exist;

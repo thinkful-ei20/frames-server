@@ -79,7 +79,6 @@ router.post('/', (req, res, next) => {
 	// Create the new admin user
 	let { username, email, companyName, password, phoneNumber } = req.body;
 
-	console.log('email!', email);
 
 	return Admin.hashPassword(password)
 		.then(digest => {
