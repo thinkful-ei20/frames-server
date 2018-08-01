@@ -168,10 +168,13 @@ router.post('/frame', (req, res, next) => {
 					// check if the weekday is the same as the frame day
 					// check if start time is at or after available time
 					// check that end time is at or before available end
+					console.log(weekday.start, weekday.end);
+					console.log(startHour, endHour);
+
 					if(
 						(weekday.day === startDay || weekday.day === endDay) &&
-						(Number.parseInt(weekday.start, 10) >= startHour) &&
-						(Number.parseInt(weekday.end, 10) <= endHour)
+						(Number.parseInt(weekday.start, 10) <= startHour) &&
+						(Number.parseInt(weekday.end, 10) >= endHour)
 					){
 						isAvailable = true;
 					}
@@ -277,14 +280,16 @@ router.put('/frame/:id', (req, res, next) => {
 				const startHour = new Date(updatedShift.startFrame).getHours();
 				const endHour = new Date(updatedShift.endFrame).getHours();
 
+
 				employee.availability.filter(weekday => {
 					// check if the weekday is the same as the frame day
 					// check if start time is at or after available time
 					// check that end time is at or before available end
+					console.log(weekday);
 					if(
 						(weekday.day === startDay || weekday.day === endDay) &&
-						(Number.parseInt(weekday.start, 10) >= startHour) &&
-						(Number.parseInt(weekday.end, 10) <= endHour)
+						(Number.parseInt(weekday.start, 10) <= startHour) &&
+						(Number.parseInt(weekday.end, 10) >= endHour)
 					){
 						isAvailable = true;
 					}
