@@ -128,7 +128,7 @@ describe('ADMIN - /api/admin', () => {
 		});
 	});
 
-	describe.only('POST /api/admin', () => {
+	describe('POST /api/admin', () => {
 
 		before(() => {
 			return mongoose.connect(TEST_DATABASE_URL)
@@ -169,7 +169,7 @@ describe('ADMIN - /api/admin', () => {
 				.post('/api/admin')
 				.send({ username : 'mycooluser',
 					email : 'auniqueemail@gmail.com',
-					companyName : 'Cool Co Kweens!', 
+					companyName : 'Cool Co Kweens!',
 					password : 'password10',
 					phoneNumber : '1231231234' })
 				.then(_res => {
@@ -260,8 +260,8 @@ describe('ADMIN - /api/admin', () => {
 				});
 		});
 
-		it('should not update the user if username is not a string', () => {
-			return chai.request(app)
+		it('should not update the user if required string fields are not typeof string', () => {
+			const usernameUpdate = chai.request(app)
 				.put(`/api/admin/${user.id}`)
 				.send({'username': 123})
 				.set('Authorization', `Bearer ${token}`)
@@ -269,20 +269,53 @@ describe('ADMIN - /api/admin', () => {
 					expect(res).to.have.status(422);
 					expect(res.response.body.message).to.equal('Field: \'username\' must be typeof String');
 				});
-		});
 
-		it('should not update the user if phoneNumber is not a number', () => {
-			return chai.request(app)
+			const emailUpdate = chai.request(app)
 				.put(`/api/admin/${user.id}`)
-				.send({'phoneNumber': '123'})
+				.send({'email': 123})
 				.set('Authorization', `Bearer ${token}`)
 				.catch(res => {
 					expect(res).to.have.status(422);
-					expect(res.response.body.message).to.equal('Field: \'phoneNumber\' must be typeof Number');
+					expect(res.response.body.message).to.equal('Field: \'email\' must be typeof String');
 				});
+
+			const companyNameUpdate = chai.request(app)
+				.put(`/api/admin/${user.id}`)
+				.send({'companyName': 123})
+				.set('Authorization', `Bearer ${token}`)
+				.catch(res => {
+					expect(res).to.have.status(422);
+					expect(res.response.body.message).to.equal('Field: \'companyName\' must be typeof String');
+				});
+
+			const passwordUpdate = chai.request(app)
+				.put(`/api/admin/${user.id}`)
+				.send({'password': 123})
+				.set('Authorization', `Bearer ${token}`)
+				.catch(res => {
+					expect(res).to.have.status(422);
+					expect(res.response.body.message).to.equal('Field: \'password\' must be typeof String');
+				});
+
+			const phoneNumberUpdate = chai.request(app)
+				.put(`/api/admin/${user.id}`)
+				.send({'phoneNumber': 123})
+				.set('Authorization', `Bearer ${token}`)
+				.catch(res => {
+					expect(res).to.have.status(422);
+					expect(res.response.body.message).to.equal('Field: \'phoneNumber\' must be typeof String');
+				});
+
+			Promise.all([
+				usernameUpdate,
+				emailUpdate,
+				companyNameUpdate,
+				passwordUpdate,
+				phoneNumberUpdate
+			]);
 		});
 
-		it('should not update the user username is not trimmed', () => {
+		it('should not update the user if required trimmed fields are not trimmed', () => {
 			return chai.request(app)
 				.put(`/api/admin/${user.id}`)
 				.send({'username': 'nyupdatedemployee '})
