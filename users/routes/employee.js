@@ -173,7 +173,9 @@ router.post('/', (req,res,next) => {
 
 	// Check that fields are as long/short as they need to be
 	const sizedFields = {
-		password: { min: 8, max: 72 }
+		password: { min: 8, max: 72 },
+		phoneNumber: { min: 10, max: 10 },
+    email: { min: 6 }
 	};
 
 	const tooSmall = Object.keys(sizedFields).find(field =>
