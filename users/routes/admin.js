@@ -47,7 +47,7 @@ router.post('/', (req, res, next) => {
 
 	const sizedFields = {
 		username: { min: 1 },
-		email: { min: 1 },
+		email: { min: 6 },
 		companyName: { min: 1 },
 		password: { min: 8, max: 72 },
 	};
@@ -190,7 +190,6 @@ router.put('/:adminId', (req, res, next) => {
 	}
 
 	const trimmedFields = ['username', 'email', 'companyName', 'phoneNumber', 'password'];
-
 	const nonTrimmedField = trimmedFields.find(field => {
 		return field in req.body && req.body[field].trim() !== req.body[field];
 	});
@@ -203,14 +202,15 @@ router.put('/:adminId', (req, res, next) => {
 
 	const sizedFields = {
 		username: { min: 1 },
-		email: { min: 1 },
+		email: { min: 6 },
 		companyName: { min: 1 },
 		password: { min: 8, max: 72 },
 	};
 
 	const tooSmall = Object.keys(sizedFields).find(field => {
-		if(req.body[field])
+		if(req.body[field]) {
 			return 'min' in sizedFields[field] && req.body[field].trim().length < sizedFields[field].min;
+		}
 	});
 
 	const tooLarge = Object.keys(sizedFields).find(field => {
