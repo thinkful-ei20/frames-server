@@ -65,7 +65,7 @@ router.put('/:employeeId', (req, res, next) => {
 	});
 
 	// Check that all required fields are present
-	const requiredFields = ['email', 'password', 'phoneNumber'];
+	const requiredFields = ['password'];
 
 	const missingField = requiredFields.find(field => !(field in req.body));
 
@@ -110,9 +110,12 @@ router.put('/:employeeId', (req, res, next) => {
 		email: { min: 6 }
 	};
 
-	const tooSmall = Object.keys(sizedFields).find(field =>
-		'min' in sizedFields[field] && req.body[field].length < sizedFields[field].min
-	);
+	const tooSmall = Object.keys(sizedFields).find(field =>{
+		if('min' in sizedFields[field] && req.body[field]) {
+			if(req.body[field].length < sizedFields[field].min){
+				return true;
+			}
+		}});
 
 	if (tooSmall) {
 		const min = sizedFields[tooSmall].min;
@@ -121,9 +124,12 @@ router.put('/:employeeId', (req, res, next) => {
 		return next(err);
 	}
 
-	const tooLarge = Object.keys(sizedFields).find(field =>
-		'max' in sizedFields[field] && req.body[field].length > sizedFields[field].max
-	);
+	const tooLarge = Object.keys(sizedFields).find(field => {
+		if('max' in sizedFields[field] && req.body[field]) {
+			if(req.body[field].length > sizedFields[field].max){
+				return true;
+			}
+		}});
 
 	if (tooLarge) {
 		const max = sizedFields[tooLarge].max;
@@ -150,6 +156,7 @@ router.put('/:employeeId', (req, res, next) => {
 					return next();
 				})
 				.catch(err => {
+
 					if (err.code === 11000) {
 						err = new Error('Email already exists');
 						err.status = 400;
