@@ -23,6 +23,14 @@ A managing and scheduling API/client for small retailers and restuarants. When s
 
 ***
 
+ ## Authors
+* [Cameron Prier](https://github.com/Csprier)
+* [Marina Dargitz](https://github.com/mdargitz)
+* [Marina Valiquette](https://github.com/Sakela17)
+* [Gianluca Paterson](https://github.com/patersog)
+
+***
+
 ## API Documentation
 
 ### Admin endpoints
