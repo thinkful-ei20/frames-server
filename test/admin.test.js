@@ -16,7 +16,7 @@ const expect = chai.expect;
 chai.use(chaiHttp);
 chai.use(chaiExclude);
 
-describe('ADMIN - /api/admin', () => {
+describe.only('ADMIN - /api/admin', () => {
 
 	const username = 'exampleuser123';
 	const email = 'exampleuser123@test.com';
@@ -26,6 +26,37 @@ describe('ADMIN - /api/admin', () => {
 
 	let token;
 	let user;
+
+
+	before(() => {
+		return mongoose.connect(TEST_DATABASE_URL)
+			.then(() => mongoose.connection.db.dropDatabase());
+	});
+	beforeEach(() => {
+		return Admin.create({
+			username,
+			email,
+			companyName,
+			password,
+			phoneNumber,
+		})
+			.then((currUser) => {
+				user = currUser;
+				token = jwt.sign(
+					{user},
+					JWT_SECRET,
+					{subject : user.username});
+			})
+			.then(() => {
+				return Admin.createIndexes();
+			});
+	});
+	afterEach(() => {
+		return mongoose.connection.db.dropDatabase();
+	});
+	after(() => {
+		return mongoose.disconnect();
+	});
 
 	// describe('GET ALL /api/admin', () => {
 	// 	it('should return an array of all admins', () => {
@@ -53,36 +84,6 @@ describe('ADMIN - /api/admin', () => {
 	// });
 
 	describe('GET ONE /api/admin/:adminId', () => {
-		before(() => {
-			return mongoose.connect(TEST_DATABASE_URL)
-				.then(() => mongoose.connection.db.dropDatabase());
-		});
-		beforeEach(() => {
-			return Admin.create({
-				username,
-				email,
-				companyName,
-				password,
-				phoneNumber,
-			})
-				.then((currUser) => {
-					user = currUser;
-
-					token = jwt.sign(
-						{user},
-						JWT_SECRET,
-						{subject : user.username});
-				})
-				.then(() => {
-					return Admin.createIndexes();
-				});
-		});
-		afterEach(() => {
-			return mongoose.connection.db.dropDatabase();
-		});
-		after(() => {
-			return mongoose.disconnect();
-		});
 
 		it('should return the admin, given valid credentials', () => {
 
@@ -130,38 +131,6 @@ describe('ADMIN - /api/admin', () => {
 
 	describe('POST /api/admin', () => {
 
-		before(() => {
-			return mongoose.connect(TEST_DATABASE_URL)
-				.then(() => mongoose.connection.db.dropDatabase());
-		});
-		beforeEach(() => {
-			return Admin.create({
-				username,
-				email,
-				companyName,
-				password,
-				phoneNumber,
-			})
-				.then((currUser) => {
-					user = currUser;
-
-					token = jwt.sign(
-						{user},
-						JWT_SECRET,
-						{subject : user.username});
-				})
-				.then(() => {
-					return Admin.createIndexes();
-				});
-		});
-		afterEach(() => {
-			return mongoose.connection.db.dropDatabase();
-		});
-		after(() => {
-			return mongoose.disconnect();
-		});
-
-
 		it('Should create a new admin user', () => {
 			let res;
 			return chai
@@ -196,37 +165,6 @@ describe('ADMIN - /api/admin', () => {
 	});
 
 	describe('PUT /api/admin/:adminId', () => {
-
-		before(() => {
-			return mongoose.connect(TEST_DATABASE_URL)
-				.then(() => mongoose.connection.db.dropDatabase());
-		});
-		beforeEach(() => {
-			return Admin.create({
-				username,
-				email,
-				companyName,
-				password,
-				phoneNumber,
-			})
-				.then((currUser) => {
-					user = currUser;
-
-					token = jwt.sign(
-						{user},
-						JWT_SECRET,
-						{subject : user.username});
-				})
-				.then(() => {
-					return Admin.createIndexes();
-				});
-		});
-		afterEach(() => {
-			return mongoose.connection.db.dropDatabase();
-		});
-		after(() => {
-			return mongoose.disconnect();
-		});
 
 		it('should update the admin given correct credentials', () => {
 			let res;
@@ -316,69 +254,130 @@ describe('ADMIN - /api/admin', () => {
 		});
 
 		it('should not update the user if required trimmed fields are not trimmed', () => {
-			return chai.request(app)
+			const usernameUpdate = chai.request(app)
 				.put(`/api/admin/${user.id}`)
-				.send({'username': 'nyupdatedemployee '})
+				.send({'username': ' newusername '})
 				.set('Authorization', `Bearer ${token}`)
 				.catch(res => {
 					expect(res).to.have.status(422);
 					expect(res.response.body.message).to.equal('Field: \'username\' cannot start or end with a whitespace!');
 				});
+
+			const emailUpdate = chai.request(app)
+				.put(`/api/admin/${user.id}`)
+				.send({'email': ' test@email.com '})
+				.set('Authorization', `Bearer ${token}`)
+				.catch(res => {
+					expect(res).to.have.status(422);
+					expect(res.response.body.message).to.equal('Field: \'email\' cannot start or end with a whitespace!');
+				});
+
+			const companyNameUpdate = chai.request(app)
+				.put(`/api/admin/${user.id}`)
+				.send({'companyName': ' test company name '})
+				.set('Authorization', `Bearer ${token}`)
+				.catch(res => {
+					expect(res).to.have.status(422);
+					expect(res.response.body.message).to.equal('Field: \'companyName\' cannot start or end with a whitespace!');
+				});
+
+			const passwordUpdate = chai.request(app)
+				.put(`/api/admin/${user.id}`)
+				.send({'password': ' testpassword '})
+				.set('Authorization', `Bearer ${token}`)
+				.catch(res => {
+					expect(res).to.have.status(422);
+					expect(res.response.body.message).to.equal('Field: \'password\' cannot start or end with a whitespace!');
+				});
+
+			const phoneNumberUpdate = chai.request(app)
+				.put(`/api/admin/${user.id}`)
+				.send({'phoneNumber': ' 1234567890 '})
+				.set('Authorization', `Bearer ${token}`)
+				.catch(res => {
+					expect(res).to.have.status(422);
+					expect(res.response.body.message).to.equal('Field: \'phoneNumber\' cannot start or end with a whitespace!');
+				});
+
+			Promise.all([
+				usernameUpdate,
+				emailUpdate,
+				companyNameUpdate,
+				passwordUpdate,
+				phoneNumberUpdate
+			]);
 		});
 
-		it('should not update the user if username is too short', () => {
-			return chai.request(app)
+		it.only('should not update the field if the length requirements are not met', () => {
+			const usernameUpdateShort = chai.request(app)
 				.put(`/api/admin/${user.id}`)
 				.send({'username': ''})
 				.set('Authorization', `Bearer ${token}`)
 				.catch(res => {
+					// console.log(res);
 					expect(res).to.have.status(422);
 					expect(res.response.body.message).to.equal('Field: \'username\' must be at least 1 characters long');
 				});
-		});
 
+			// const emailUpdateShort = chai.request(app)
+			// 	.put(`/api/admin/${user.id}`)
+			// 	.send({'email': 't@s.t'})
+			// 	.set('Authorization', `Bearer ${token}`)
+			// 	.catch(res => {
+			// 		expect(res).to.have.status(422);
+			// 		expect(res.response.body.message).to.equal('Field: \'email\' must be at least 6 characters long');
+			// 	});
+
+			// const companyNameUpdateShort = chai.request(app)
+			// 	.put(`/api/admin/${user.id}`)
+			// 	.send({'companyName': ''})
+			// 	.set('Authorization', `Bearer ${token}`)
+			// 	.catch(res => {
+			// 		expect(res).to.have.status(422);
+			// 		expect(res.response.body.message).to.equal('Field: \'companyName\' must be at least 1 characters long');
+			// 	});
+
+			// const passwordUpdateShort = chai.request(app)
+			// 	.put(`/api/admin/${user.id}`)
+			// 	.send({'password': '1234567'})
+			// 	.set('Authorization', `Bearer ${token}`)
+			// 	.catch(res => {
+			// 		expect(res).to.have.status(422);
+			// 		expect(res.response.body.message).to.equal('Field: \'password\' must be at least 8 characters long');
+			// 	});
+
+			// const passwordUpdateLong= chai.request(app)
+			// 	.put(`/api/admin/${user.id}`)
+			// 	.send({'password': '1234567890123456789012345678901234567890123456789012345678901234567890123'})
+			// 	.set('Authorization', `Bearer ${token}`)
+			// 	.catch(res => {
+			// 		expect(res).to.have.status(422);
+			// 		expect(res.response.body.message).to.equal('Field: \'password\' must be at most 72 characters long ');
+			// 	});
+
+
+			Promise.all([
+				usernameUpdateShort//,
+				// emailUpdateShort,
+				// companyNameUpdateShort,
+				// passwordUpdateShort,
+				// passwordUpdateLong
+			]);
+		});
 	});
 
-	describe('DELETE /api/admin/:adminId', () => {
-		before(() => {
-			return mongoose.connect(TEST_DATABASE_URL)
-				.then(() => mongoose.connection.db.dropDatabase());
-		});
-		beforeEach(() => {
-			return Admin.create({
-				username,
-				email,
-				companyName,
-				password,
-				phoneNumber,
-			})
-				.then((currUser) => {
-					user = currUser;
-					token = jwt.sign(
-						{user},
-						JWT_SECRET,
-						{subject : user.username});
-				})
-				.then(() => {
-					return Admin.createIndexes();
-				});
-		});
-		afterEach(() => {
-			return mongoose.connection.db.dropDatabase();
-		});
-		after(() => {
-			return mongoose.disconnect();
-		});
+	// describe('DELETE /api/admin/:adminId', () => {
 
-		it('should delete the user', () => {
-			return chai.request(app)
-				.delete(`/api/admin/${user.id}`)
-				.then(res => {
-					expect(res).to.have.status(204);
+	// 	it('should delete the user', () => {
+	// 		return chai.request(app)
+	// 			.delete(`/api/admin/${user.id}`)
+	// 			.then(res => {
+	// 				expect(res).to.have.status(204);
 
-					return Admin.findById(user.id);
-				})
-				.then(data => expect(data).to.be.null);
-		});
-	});
+	// 				return Admin.findById(user.id);
+	// 			})
+	// 			.then(data => expect(data).to.be.null);
+	// 	});
+	// });
+
 });
