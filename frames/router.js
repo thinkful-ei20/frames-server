@@ -316,7 +316,7 @@ router.put('/frame/:id', (req, res, next) => {
 					const frameEnd = new Date(frame.endFrame);
 
 					if (start >= frameStart && end <= frameEnd) { // If frame is inside a frame
-						errorMessage = 'If you have not changed any data, please close the modal!';
+						errorMessage = 'If you have not changed any data, please close the menu!';
 						return true;
 					}
 					if (end > frameStart && end < frameEnd) { // If end date is inside a frame
