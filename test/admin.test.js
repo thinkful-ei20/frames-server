@@ -16,7 +16,7 @@ const expect = chai.expect;
 chai.use(chaiHttp);
 chai.use(chaiExclude);
 
-describe.only('ADMIN - /api/admin', () => {
+describe('ADMIN - /api/admin', () => {
 
 	const username = 'exampleuser123';
 	const email = 'exampleuser123@test.com';
@@ -308,60 +308,59 @@ describe.only('ADMIN - /api/admin', () => {
 			]);
 		});
 
-		it.only('should not update the field if the length requirements are not met', () => {
+		it('should not update the field if the length requirements are not met', () => {
 			const usernameUpdateShort = chai.request(app)
 				.put(`/api/admin/${user.id}`)
-				.send({'username': ''})
+				.send({'username': '' ,'password':'password10'})
 				.set('Authorization', `Bearer ${token}`)
 				.catch(res => {
-					// console.log(res);
 					expect(res).to.have.status(422);
 					expect(res.response.body.message).to.equal('Field: \'username\' must be at least 1 characters long');
 				});
 
-			// const emailUpdateShort = chai.request(app)
-			// 	.put(`/api/admin/${user.id}`)
-			// 	.send({'email': 't@s.t'})
-			// 	.set('Authorization', `Bearer ${token}`)
-			// 	.catch(res => {
-			// 		expect(res).to.have.status(422);
-			// 		expect(res.response.body.message).to.equal('Field: \'email\' must be at least 6 characters long');
-			// 	});
+			const emailUpdateShort = chai.request(app)
+				.put(`/api/admin/${user.id}`)
+				.send({'email': 't@s.t','password':'password10'})
+				.set('Authorization', `Bearer ${token}`)
+				.catch(res => {
+					expect(res).to.have.status(422);
+					expect(res.response.body.message).to.equal('Field: \'email\' must be at least 6 characters long');
+				});
 
-			// const companyNameUpdateShort = chai.request(app)
-			// 	.put(`/api/admin/${user.id}`)
-			// 	.send({'companyName': ''})
-			// 	.set('Authorization', `Bearer ${token}`)
-			// 	.catch(res => {
-			// 		expect(res).to.have.status(422);
-			// 		expect(res.response.body.message).to.equal('Field: \'companyName\' must be at least 1 characters long');
-			// 	});
+			const companyNameUpdateShort = chai.request(app)
+				.put(`/api/admin/${user.id}`)
+				.send({'companyName': '','password':'password10'})
+				.set('Authorization', `Bearer ${token}`)
+				.catch(res => {
+					expect(res).to.have.status(422);
+					expect(res.response.body.message).to.equal('Field: \'companyName\' must be at least 1 characters long');
+				});
 
-			// const passwordUpdateShort = chai.request(app)
-			// 	.put(`/api/admin/${user.id}`)
-			// 	.send({'password': '1234567'})
-			// 	.set('Authorization', `Bearer ${token}`)
-			// 	.catch(res => {
-			// 		expect(res).to.have.status(422);
-			// 		expect(res.response.body.message).to.equal('Field: \'password\' must be at least 8 characters long');
-			// 	});
+			const passwordUpdateShort = chai.request(app)
+				.put(`/api/admin/${user.id}`)
+				.send({'password': '1234567'})
+				.set('Authorization', `Bearer ${token}`)
+				.catch(res => {
+					expect(res).to.have.status(422);
+					expect(res.response.body.message).to.equal('Field: \'password\' must be at least 8 characters long');
+				});
 
-			// const passwordUpdateLong= chai.request(app)
-			// 	.put(`/api/admin/${user.id}`)
-			// 	.send({'password': '1234567890123456789012345678901234567890123456789012345678901234567890123'})
-			// 	.set('Authorization', `Bearer ${token}`)
-			// 	.catch(res => {
-			// 		expect(res).to.have.status(422);
-			// 		expect(res.response.body.message).to.equal('Field: \'password\' must be at most 72 characters long ');
-			// 	});
+			const passwordUpdateLong= chai.request(app)
+				.put(`/api/admin/${user.id}`)
+				.send({'password': '1234567890123456789012345678901234567890123456789012345678901234567890123'})
+				.set('Authorization', `Bearer ${token}`)
+				.catch(res => {
+					expect(res).to.have.status(422);
+					expect(res.response.body.message).to.equal('Field: \'password\' must be at most 72 characters long ');
+				});
 
 
 			Promise.all([
-				usernameUpdateShort//,
-				// emailUpdateShort,
-				// companyNameUpdateShort,
-				// passwordUpdateShort,
-				// passwordUpdateLong
+				usernameUpdateShort,
+				emailUpdateShort,
+				companyNameUpdateShort,
+				passwordUpdateShort,
+				passwordUpdateLong
 			]);
 		});
 	});

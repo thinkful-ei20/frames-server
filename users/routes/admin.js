@@ -188,10 +188,11 @@ router.put('/:adminId', (req, res, next) => {
 		err.status = 422;
 		return next(err);
 	}
-
 	const trimmedFields = ['username', 'email', 'companyName', 'phoneNumber', 'password'];
 	const nonTrimmedField = trimmedFields.find(field => {
-		return field in req.body && req.body[field].trim() !== req.body[field];
+		if(req.body[field]){
+			return field in req.body && req.body[field].trim() !== req.body[field];
+		}
 	});
 
 	if (nonTrimmedField) {
@@ -232,6 +233,7 @@ router.put('/:adminId', (req, res, next) => {
 		return next(err);
 	}
 	/* Valid input check END */
+
 
 	let{password} = req.body;
 

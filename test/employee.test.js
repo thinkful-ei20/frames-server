@@ -16,7 +16,7 @@ const expect = chai.expect;
 chai.use(chaiHttp);
 chai.use(chaiExclude);
 
-describe.only('Employee - /api/employee', () => {
+describe('Employee - /api/employee', () => {
 	const dummyEmployee = {
 		firstname: 'Firstname',
 		lastname: 'Lastname',
