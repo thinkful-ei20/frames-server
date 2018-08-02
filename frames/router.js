@@ -1,5 +1,3 @@
-
-
 const router = require('express').Router();
 const passport = require('passport');
 const mongoose = require('mongoose');
@@ -19,9 +17,11 @@ const Employee = require('../users/models/employee');
 // 		.catch(next);
 // });
 
+/* ================================================================================ */
 // Protect endpoints using JWT Strategy
 router.use('/', passport.authenticate('jwt', { session: false, failWithError: true }));
 
+/* ================================================================================ */
 // Get all frames
 router.get('/', (req, res, next) => {
 
@@ -50,6 +50,7 @@ router.get('/', (req, res, next) => {
 		});
 });
 
+/* ================================================================================ */
 // Get all frames for one employee
 router.get('/:id', (req, res, next) => {
 
@@ -77,6 +78,7 @@ router.get('/:id', (req, res, next) => {
 		.catch(next);
 });
 
+/* ================================================================================ */
 // Get a single frame by frameId
 router.get('/frame/:id', (req, res, next) => {
 
@@ -104,6 +106,7 @@ router.get('/frame/:id', (req, res, next) => {
 		.catch(next);
 });
 
+/* ================================================================================ */
 // Post/create a frame
 router.post('/frame', (req, res, next) => {
 
@@ -236,19 +239,23 @@ router.post('/frame', (req, res, next) => {
 	}
 });
 
+/* ================================================================================ */
 // Update a single frame
 router.put('/frame/:id', (req, res, next) => {
-
 	const adminId = req.user.id;
 	const frameId = req.params.id;
 	const updateableFields = ['startFrame', 'endFrame', 'employeeId'];
 	const updatedShift = {};
+
+	// map over the updateableFields and for every field check if the field is in the req.body
+	// if it is, update the updateableField[field] to be the req.body's value of that field
 	updateableFields.map(field => {
 		if (field in req.body){
 			updatedShift[field] = req.body[field];
 		}
 	});
 
+	// Validate the frameId
 	if (!mongoose.Types.ObjectId.isValid(frameId)) {
 		const err = new Error(`The frame id ${frameId} is not valid`);
 		err.status = 400;
@@ -256,7 +263,7 @@ router.put('/frame/:id', (req, res, next) => {
 	}
 
 	// Check that end frame is later than start frame
-	if(updatedShift.startFrame && updatedShift.endFrame){
+	if (updatedShift.startFrame && updatedShift.endFrame){
 		const start = new Date(updatedShift.startFrame);
 		const end = new Date(updatedShift.endFrame);
 		if(start > end){
@@ -266,9 +273,9 @@ router.put('/frame/:id', (req, res, next) => {
 		}
 	}
 
-
-
-	if(updatedShift.employeeId) {
+	// if updatedShift.employeeId exists
+	if (updatedShift.employeeId) {
+		// Fnid the employee by their id
 		Employee.findById(updatedShift.employeeId)
 			.then(employee => {
 				// Availability validation
@@ -280,62 +287,60 @@ router.put('/frame/:id', (req, res, next) => {
 				const startHour = new Date(updatedShift.startFrame).getHours();
 				const endHour = new Date(updatedShift.endFrame).getHours();
 
-
+				// Filter over the employee's availability, and for every weekday
 				employee.availability.filter(weekday => {
 					// check if the weekday is the same as the frame day
 					// check if start time is at or after available time
 					// check that end time is at or before available end
-					console.log(weekday);
-					if(
+					if (
 						(weekday.day === startDay || weekday.day === endDay) &&
 						(Number.parseInt(weekday.start, 10) <= startHour) &&
 						(Number.parseInt(weekday.end, 10) >= endHour)
-					){
+					) {
 						isAvailable = true;
 					}
 				});
 
 				//Throw an error if the employee is not available at the given time
-				if (!isAvailable){
+				if (!isAvailable) {
 					const err = new Error('The employee is not available during these times');
 					err.status = 422;
 					return next(err);
 				}
-
 				return Frame.find({employeeId: updatedShift.employeeId});
 			})
-			.then( results => {
+			.then(results => {
 				let errorMessage;
 				const valid = results.filter(frame => {
 					const start = new Date(updatedShift.startFrame);
 					const end = new Date(updatedShift.endFrame);
 					const frameStart = new Date(frame.startFrame);
 					const frameEnd = new Date(frame.endFrame);
-					if(start >= frameStart && end <= frameEnd) { // If frame is inside a frame
-						errorMessage = 'This frame is inside an existing frame.';
+
+					if (start >= frameStart && end <= frameEnd) { // If frame is inside a frame
+						errorMessage = 'If you have not changed any data, please close the modal!';
 						return true;
 					}
-					if(end > frameStart && end < frameEnd) { // If end date is inside a frame
+					if (end > frameStart && end < frameEnd) { // If end date is inside a frame
 						errorMessage = 'This frame\'s ending is inside another frame.';
 						return true;
 					}
-					if(start < frameEnd && start >= frameStart) { // If start date is inside a frame
+					if (start < frameEnd && start >= frameStart) { // If start date is inside a frame
 						errorMessage = 'This frame\'s start is inside another frame.';
 						return true;
 					}
-					if(start < frameStart && end > frameEnd) {
+					if (start < frameStart && end > frameEnd) {
 						errorMessage = 'There is a conflict with the selected time frame.';
 						return true;
 					}
 					return false;
 				});
 
-				if(valid.length) {
+				if (valid.length) {
 					const err = new Error(errorMessage);
 					err.status = 422;
 					return next(err);
 				}
-
 				return Frame.findOneAndUpdate({ _id: frameId, adminId }, updatedShift, {new: true});
 			})
 			.then(result => {
@@ -343,7 +348,7 @@ router.put('/frame/:id', (req, res, next) => {
 			})
 			.catch(next);
 	} else {
-		// else all checks out update the frame!
+		// else all checks out, update the frame!
 		Frame.findOneAndUpdate({ _id: frameId, adminId }, updatedShift, {new: true})
 			.then(result => {
 				res.json(result);
@@ -352,6 +357,7 @@ router.put('/frame/:id', (req, res, next) => {
 	}
 });
 
+/* ================================================================================ */
 // Delete a single frame
 router.delete('/frame/:id', (req, res, next) => {
 	const adminId = req.user.id;
