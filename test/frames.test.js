@@ -52,7 +52,14 @@ describe('/api/frames', () => {
 					email : 'janesemail@test.com',
 					adminId : user.id,
 					password : 'test pass',
-					phoneNumber: 1231231234
+					phoneNumber: '1231231234',
+					availability : [
+						{
+							day : 'saturday',
+							start : '06:00',
+							end: '15:00'
+						}
+					]
 				});
 			})
 			.then(curremployee => {

@@ -24,7 +24,7 @@ describe('Frames API - Login', () => {
 	const email = 'example@test.com';
 	const companyname = 'merntalists';
 	const password = 'password123';
-	const phoneNumber = 2225551111;
+	const phoneNumber = '2225551111';
 
 	before(() => {
 		return mongoose.connect(TEST_DATABASE_URL)

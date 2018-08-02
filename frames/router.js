@@ -168,8 +168,6 @@ router.post('/frame', (req, res, next) => {
 					// check if the weekday is the same as the frame day
 					// check if start time is at or after available time
 					// check that end time is at or before available end
-					console.log(weekday.start, weekday.end);
-					console.log(startHour, endHour);
 
 					if(
 						(weekday.day === startDay || weekday.day === endDay) &&
