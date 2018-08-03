@@ -305,7 +305,11 @@ router.put('/frame/:id', (req, res, next) => {
 					err.status = 422;
 					return next(err);
 				}
-				return Frame.find({employeeId: updatedShift.employeeId});
+				return Frame.find(
+					{
+						employeeId: updatedShift.employeeId,
+						_id: {$ne: frameId}
+					});
 			})
 			.then(results => {
 				let errorMessage;
