@@ -4,7 +4,7 @@
 https://frames-server.herokuapp.com/
 
 ## Client URL
-https://frames-client.netlify.com/
+https://frames.surge.sh/
 ## Client Repo
 https://github.com/thinkful-ei20/frames-client
 ***
